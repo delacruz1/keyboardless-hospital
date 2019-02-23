@@ -28,6 +28,8 @@ const handlers = {
     const { userId } = this.event.session.user;
     const { slots } = this.event.request.intent;
 
+    console.log("BEGINNING INTENT");
+
     // Name
     if (!slots.Name.value) {
       const slotToElicit = 'Name';
@@ -44,16 +46,36 @@ const handlers = {
       return this.emit(':elicitSlot', slotToElicit, speechOutput, repromptSpeech);
     }
 
+    // Age
+    if (!slots.Age.value) {
+      const slotToElicit = 'Age';
+      const speechOutput = 'Age?';
+      const repromptSpeech = 'Age?';
+      return this.emit(':elicitSlot', slotToElicit, speechOutput, repromptSpeech);
+    }
+
+    // Phone Number
+    if (!slots.PhoneNumber.value) {
+      const slotToElicit = 'PhoneNumber';
+      const speechOutput = 'Phone Number?';
+      const repromptSpeech = 'Phone Number?';
+      return this.emit(':elicitSlot', slotToElicit, speechOutput, repromptSpeech);
+    }
+
     // all slot values received and confirmed, now add the record to DynamoDB
 
     const name = slots.Name.value;
     const dob = slots.DateofBirth.value;
+    const age = slots.Age.value;
+    const phone = slots.PhoneNumber.value;
     const dynamoParams = {
       TableName: testFormTable,
       Item: {
         Name: name,
         UserId: userId,
-        DateofBirth: dob
+        DateofBirth: dob,
+        Age: age,
+        PhoneNumber: phone
       },
       ReturnValues: 'ALL_OLD'
     };
