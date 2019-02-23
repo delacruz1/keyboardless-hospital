@@ -1,4 +1,4 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Before running the availble scripts below, make sure that you run "npm install" to ensure all frontend dependencies are installed.
 
 ## Available Scripts
 
