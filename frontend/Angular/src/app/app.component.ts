@@ -12,36 +12,9 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 })
 export class AppComponent {
   title = 'KHTest';
-  
+  asyncData: any;
   private dynamodb;
   private docClient;
-  // private params = {
-  //   RequestItems: {
-  //     TestForm: {
-  //       Keys: ['Armando']
-  //     }
-  //   }
-  // }
-// private params = {
-//   TestForm: 'Patients',
-//   Key: {
-//     Name: "Armando"
-//   }
-// };
-
-// private readObs = Observable.create(observer => {
-//    this.docClient.scan(this.params, (err, data) => {
-//    if (err) {
-//        observer.error(err);
-//    } else{
-//        observer.next(data.Items.map(item => {
-//        item.release_date = new Date(item.release_date);
-//        console.log(item);
-//        return item;
-//        }));
-//    }
-//    });
-// });
 
 constructor() {
    // provide your access key and secret access key as obtained in the previous step
@@ -62,23 +35,10 @@ constructor() {
      }
    }
 
-   this.docClient.get(params, function(err, data){
-     if(err){
-       console.log(err.stack);
-     }
-     else{
-       console.log(data);
-     }
+   this.docClient.get(params, (err,data) => {
+     this.asyncData = data;
+     console.log(data);
    });
-
-  //  this.dynamodb.batchGetItem(this.params, function(err, data){
-  //    if(err) console.log(err.stack);
-  //    else console.log(data);
-  //  });
 }
-
-// public getItems(): Observable<any[]> {
-//    return this.readObs;
-// }
 
 }
