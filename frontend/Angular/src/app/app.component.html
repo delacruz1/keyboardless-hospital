@@ -1,6 +1,7 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<h1>{{asyncData.Item.Name}}</h1>
-<h1>{{asyncData.Item.Age}}</h1>
-<h1>{{asyncData.Item.PhoneNumber}}</h1>
-<h1>{{asyncData.Item.DateofBirth}}</h1>
+<div *ngFor="let param of paramsData">
+    {{param}}: <input value={{asyncData[param]}}>
+</div>
+
+
 
