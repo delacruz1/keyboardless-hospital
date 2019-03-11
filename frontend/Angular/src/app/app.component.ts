@@ -32,16 +32,17 @@ constructor() {
 }
 
 ngOnInit(){
+//   setTimeout(function(){
+//     window.location.reload(true);
+//  }, 3000);
   this.getUser();
 }
 
 getUser(){
   let params = {
-    TableName: 'TestForm',
+    TableName: 'Demo',
     Key: {
-      'Name': 'Armando',
-// tslint:disable-next-line: max-line-length
-      'UserId': 'amzn1.ask.account.AG2NSCTUCTYRXGXN2AOGSDM6MCFY337L7GP7DGGCKS53U46Q4Z43LZOACCQLJ3XXPB3DOVEPARIWQ3Z362KUP3DJMKEHX4HDCJQMTPA77XOG2I2RLXJZ5XLMDVMQL3XJUNMRBBOP3NIE54W2CON4EL6BLBYAJ5FFHKIYFQEI4PK7EFXRY3TDIRSJSZJ2A7HPZ2RUBXADWFFV56Y'
+      'Name': 'John'
     }
   }
 
