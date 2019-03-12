@@ -5,6 +5,7 @@ const awsSDK = require('aws-sdk');
 const testFormTable = 'Demo';
 const db = new awsSDK.DynamoDB();
 const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.DocumentClient();
+let formConfirmed = false;
 
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
@@ -109,6 +110,7 @@ const CompleteHandler = {
         && handlerInput.requestEnvelope.request.intent.slots.name.value
         && handlerInput.requestEnvelope.request.intent.slots.dob.value
         && handlerInput.requestEnvelope.request.intent.slots.age.value
+        && !formConfirmed
   },
   handle(handlerInput) {
     age = handlerInput.requestEnvelope.request.intent.slots.age.value;
@@ -131,8 +133,9 @@ const CompleteHandler = {
         console.log(data);
       }
     }).promise();
+    CONFIRM_MESSAGE = "Just to confirm, your responses are: " + name + ", " + dob + ", " + age + ". Is this correct?";
     return handlerInput.responseBuilder
-      .speak('Form Completed!')
+      .speak(CONFIRM_MESSAGE)
       .getResponse();
   }
 }

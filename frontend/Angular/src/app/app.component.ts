@@ -32,9 +32,9 @@ constructor() {
 }
 
 ngOnInit(){
-//   setTimeout(function(){
-//     window.location.reload(true);
-//  }, 3000);
+  setTimeout(function(){
+    window.location.reload(true);
+ }, 2000);
   this.getUser();
 }
 
