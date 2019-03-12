@@ -49,7 +49,7 @@ export class AppComponent {
           Could we have some sort of exported variable to inserted as the value for the name value below? 
 
         */
-          'Name': "Armando Taurus"
+          'Name': "joey wheeler"
   // tslint:disable-next-line: max-line-length
       }
     }
