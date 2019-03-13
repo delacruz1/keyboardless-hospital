@@ -5,7 +5,12 @@ const awsSDK = require('aws-sdk');
 const testFormTable = 'Demo';
 const db = new awsSDK.DynamoDB();
 const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.DocumentClient();
-let formConfirmed = false;
+var confirmationCheck;
+var fix;
+const testSession = "123";
+var beginName = "N/A";
+var beginDOB = "N/A";
+var beginAge = "N/A";
 
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
@@ -31,11 +36,26 @@ const BeginFormHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === "IntentRequest"
       && handlerInput.requestEnvelope.request.intent.name === "BeginFormIntent"
-      && handlerInput.requestEnvelope.request.dialogState !== 'COMPLETED';
+      && !handlerInput.requestEnvelope.request.intent.slots.name.value;
   },
   handle(handlerInput) {
+    confirmationCheck = false;
+    fix = false;
+    let params = {
+      TableName: testFormTable,
+      Item: {
+        SessionID: testSession,
+        PatientName: beginName,
+        PatientDOB: beginDOB,
+        PatientAge: beginAge
+      },
+      ReturnValues: 'ALL_OLD'
+    };
+    docClient.put(params).promise();
     return handlerInput.responseBuilder
-      .addDelegateDirective()
+      .speak("What is the Name?")
+      .reprompt("Sorry, what is the Name?")
+      .addElicitSlotDirective("name")
       .getResponse();
   }
 }
@@ -49,18 +69,28 @@ const DOBHandler = {
   },
   handle(handlerInput) {
     name = handlerInput.requestEnvelope.request.intent.slots.name.value;
-    const params = {
-      TableName: testFormTable,
-      Item: {
-        Name: name
+    let params = {
+      TableName:testFormTable,
+      Key:{
+          "SessionID":testSession
       },
-      ReturnValues: 'ALL_OLD'
-    };
-
-    docClient.put(params).promise();
+      UpdateExpression: "set PatientName = :updateName",
+      ExpressionAttributeValues:{
+          ":updateName":name
+      },
+      ReturnValues:"UPDATED_NEW"
+  };
+    docClient.update(params,(err, data) =>{
+      if(err){
+        console.log(err);
+      }
+      else{
+        console.log(data);
+      }
+    }).promise();
     return handlerInput.responseBuilder
-      .speak('Date of Birth?')
-      .reprompt('What is the Date of Birth?')
+      .speak('What is the Date of Birth?')
+      .reprompt('Sorry, what is the Date of Birth?')
       .addElicitSlotDirective('dob')
       .getResponse();
   }
@@ -78,9 +108,9 @@ const AgeHandler = {
       let params = {
         TableName:testFormTable,
         Key:{
-            "Name":name
+            "SessionID": testSession
         },
-        UpdateExpression: "set DOB = :updateDOB",
+        UpdateExpression: "set PatientDOB = :updateDOB",
         ExpressionAttributeValues:{
             ":updateDOB":dob
         },
@@ -95,33 +125,39 @@ const AgeHandler = {
         }
       }).promise();
     return handlerInput.responseBuilder
-      .speak('Age?')
-      .reprompt('What is the Age?')
+      .speak('What is the Age?')
+      .reprompt('Sorry, what is the Age?')
       .addElicitSlotDirective('age')
       .getResponse();
   }
 }
 
-const CompleteHandler = {
+const ConfirmationHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === "IntentRequest"
         && handlerInput.requestEnvelope.request.intent.name === "BeginFormIntent"
-        && handlerInput.requestEnvelope.request.dialogState === "COMPLETED"
+        && handlerInput.requestEnvelope.request.dialogState === "IN_PROGRESS"
         && handlerInput.requestEnvelope.request.intent.slots.name.value
         && handlerInput.requestEnvelope.request.intent.slots.dob.value
         && handlerInput.requestEnvelope.request.intent.slots.age.value
-        && !formConfirmed
+        && !confirmationCheck
+        && !fix;
   },
   handle(handlerInput) {
+    confirmationCheck = true;
     age = handlerInput.requestEnvelope.request.intent.slots.age.value;
+    dob = handlerInput.requestEnvelope.request.intent.slots.dob.value;
+    name = handlerInput.requestEnvelope.request.intent.slots.name.value;
     let params = {
       TableName:testFormTable,
       Key:{
-          "Name":name
+          "SessionID": testSession
       },
-      UpdateExpression: "set Age = :updateAge",
+      UpdateExpression: "set PatientAge = :updateAge, PatientName = :updateName, PatientDOB = :updateDOB",
       ExpressionAttributeValues:{
-          ":updateAge":age
+          ":updateAge":age,
+          ":updateName":name,
+          ":updateDOB":dob
       },
       ReturnValues:"UPDATED_NEW"
   };
@@ -133,9 +169,125 @@ const CompleteHandler = {
         console.log(data);
       }
     }).promise();
-    CONFIRM_MESSAGE = "Just to confirm, your responses are: " + name + ", " + dob + ", " + age + ". Is this correct?";
+    CONFIRM_MESSAGE = "Just to confirm your responses, the name is " + name + ", the Date of Birth is " + dob + ", and the Age is "
+    + age + ". Is this correct?";
+    console.log("USER CONFIRM CONFIRMATION: " + confirmationCheck);
+    console.log("USER CONFIRM FIX: " + fix);
     return handlerInput.responseBuilder
       .speak(CONFIRM_MESSAGE)
+      .reprompt(CONFIRM_MESSAGE)
+      .addElicitSlotDirective('confirmation')
+      .getResponse();
+  }
+}
+
+const FixSlotHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === "IntentRequest"
+        && handlerInput.requestEnvelope.request.intent.name === "BeginFormIntent"
+        && handlerInput.requestEnvelope.request.dialogState === "IN_PROGRESS"
+        && handlerInput.requestEnvelope.request.intent.slots.name.value
+        && handlerInput.requestEnvelope.request.intent.slots.dob.value
+        && handlerInput.requestEnvelope.request.intent.slots.age.value
+        && (handlerInput.requestEnvelope.request.intent.slots.confirmation.value == "no"
+        || handlerInput.requestEnvelope.request.intent.slots.confirmation.value == "incorrect")
+        && !fix;
+  },
+  handle(handlerInput) {
+    fix = true;
+    FIX_MESSAGE = "Which field is incorrect?";
+    console.log("FIX CONFIRMATION: " + confirmationCheck);
+    console.log("FIX FIX: " + fix);
+    return handlerInput.responseBuilder
+      .speak(FIX_MESSAGE)
+      .reprompt(FIX_MESSAGE)
+      .addElicitSlotDirective('slotFix')
+      .getResponse();
+  }
+}
+
+const FixDOBHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === "IntentRequest"
+      && handlerInput.requestEnvelope.request.intent.name === "BeginFormIntent"
+      && (handlerInput.requestEnvelope.request.intent.slots.slotFix.value == "date of birth"
+      || handlerInput.requestEnvelope.request.intent.slots.slotFix.value == "the date of birth")
+      && fix
+  },
+  handle(handlerInput) {
+    confirmationCheck = false;
+    fix = false;
+    console.log("DOBFIX CONFIRMATION: " + confirmationCheck);
+    console.log("DOBFIX FIX: " + fix);
+    return handlerInput.responseBuilder
+      .speak('What is the Date of Birth?')
+      .reprompt('Sorry, what is the Date of Birth?')
+      .addElicitSlotDirective('dob')
+      .getResponse();
+  }
+}
+
+const FixAgeHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === "IntentRequest"
+      && handlerInput.requestEnvelope.request.intent.name === "BeginFormIntent"
+      && (handlerInput.requestEnvelope.request.intent.slots.slotFix.value == "age"
+      || handlerInput.requestEnvelope.request.intent.slots.slotFix.value == "the age")
+      && fix
+  },
+  handle(handlerInput) {
+    confirmationCheck = false;
+    fix = false;
+    console.log("AGEFIX CONFIRMATION: " + confirmationCheck);
+    console.log("AGEFIX FIX: " + fix);
+    return handlerInput.responseBuilder
+      .speak('What is the Age?')
+      .reprompt('Sorry, what is the Age?')
+      .addElicitSlotDirective('age')
+      .getResponse();
+  }
+}
+
+const FixNameHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === "IntentRequest"
+      && handlerInput.requestEnvelope.request.intent.name === "BeginFormIntent"
+      && (handlerInput.requestEnvelope.request.intent.slots.slotFix.value == "name"
+      || handlerInput.requestEnvelope.request.intent.slots.slotFix.value == "the name")
+      && fix
+  },
+  handle(handlerInput) {
+    confirmationCheck = false;
+    fix = false;
+    return handlerInput.responseBuilder
+      .speak('What is the Name?')
+      .reprompt('Sorry, what is the Name?')
+      .addElicitSlotDirective('name')
+      .getResponse();
+  }
+}
+
+
+const CompleteHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === "IntentRequest"
+        && handlerInput.requestEnvelope.request.intent.name === "BeginFormIntent"
+        && handlerInput.requestEnvelope.request.dialogState === "IN_PROGRESS"
+        && handlerInput.requestEnvelope.request.intent.slots.name.value
+        && handlerInput.requestEnvelope.request.intent.slots.dob.value
+        && handlerInput.requestEnvelope.request.intent.slots.age.value
+        && (handlerInput.requestEnvelope.request.intent.slots.confirmation.value == "yes"
+        || handlerInput.requestEnvelope.request.intent.slots.confirmation.value == "correct")
+        && !fix;
+  },
+  handle(handlerInput) {
+    confirmationCheck = false;
+    fix = false;
+    console.log("COMPLETE CONFIRMATION: " + confirmationCheck);
+    console.log("COMPLETE FIX: " + fix);
+    return handlerInput.responseBuilder
+      .speak("Form completed!")
+      .withShouldEndSession(false)
       .getResponse();
   }
 }
@@ -232,9 +384,14 @@ exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
     BeginFormHandler,
+    ConfirmationHandler,
     CompleteHandler,
+    FixSlotHandler,
     DOBHandler,
     AgeHandler,
+    FixDOBHandler,
+    FixAgeHandler,
+    FixNameHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
