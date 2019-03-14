@@ -1,4 +1,26 @@
 <!--The content below is only a placeholder and can be replaced.-->
+<script>
+
+  // Enable pusher logging - don't include this in production
+  Pusher.logToConsole = true;
+
+  var pusher = new Pusher('0d9a535805e414a1933f', {
+    cluster: 'us3',
+    forceTLS: true
+  });
+
+  var channel = pusher.subscribe('my-channel');
+  channel.bind('my-event', function(data) {
+    alert(JSON.stringify(data));
+  });
+</script>
+
+<p>
+  Try publishing an event to channel <code>my-channel</code>
+  with event name <code>my-event</code>.
+</p>
+
+
 <div class="container">
   <div class="row">
     <div class="col text-center">
@@ -17,5 +39,5 @@
     </div>
   </div>
 </div>
-
+<script src="https://js.pusher.com/4.4/pusher.min.js"></script>
 <router-outlet></router-outlet>

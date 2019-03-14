@@ -32,10 +32,14 @@ export class AppComponent {
 
   }
 
-  ngOnInit() { 
+  
+  ngOnInit(){
+    setTimeout(function(){
+     window.location.reload(true);
+    }, 2000);
     this.getUser();
-  }
-
+   }
+   ​
   getUser(){
     let user = []; 
     let params = {
@@ -49,11 +53,10 @@ export class AppComponent {
           Could we have some sort of exported variable to inserted as the value for the name value below? 
 
         */
-          'Name': "joey wheeler"
+          'SessionID': "123"
   // tslint:disable-next-line: max-line-length
       }
     }
-  
     this.docClient.get(params, (err, data) => {
       this.asyncData = data.Item;
       this.paramsData = Object.keys(data.Item);
