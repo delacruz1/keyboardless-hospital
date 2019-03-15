@@ -6,7 +6,7 @@ import { interval } from 'rxjs';
 import { v4 as uuid } from 'uuid'; 
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import {name as inputName} from '../../../../amazonAlexa/index.js';
-
+import * as pusher from 'pusher-js';
 
 @Component({
   selector: 'app-root',
@@ -31,13 +31,12 @@ export class AppComponent {
     this.docClient = new AWS.DynamoDB.DocumentClient();
 
   }
-
   
   ngOnInit(){
     setTimeout(function(){
      window.location.reload(true);
     }, 2000);
-    this.getUser();
+     this.getUser();
    }
    ​
   getUser(){
@@ -64,10 +63,4 @@ export class AppComponent {
   }
 
 }
-
-/*
-TODO: Try to figure out how to get the 
-
-*/
-
 

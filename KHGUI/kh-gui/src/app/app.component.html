@@ -9,10 +9,7 @@
     forceTLS: true
   });
 
-  var channel = pusher.subscribe('my-channel');
-  channel.bind('my-event', function(data) {
-    alert(JSON.stringify(data));
-  });
+
 </script>
 
 <p>
@@ -31,7 +28,12 @@
     <div class="col">
       <div class="card">
         <div class="card-body">
-            <div *ngFor="let param of paramsData">
+          <!-- <script>
+            var channel = pusher.subscribe('field-feed');
+            channel.bind('field-event', this.getUser(), jquery('.pusher-channel').add('{{param}}: <input value={{asyncData[param]}}>')}
+            );
+          </script> -->
+            <div class="pusher-channel" *ngFor="let param of paramsData">
                 {{param}}: <input value={{asyncData[param]}}>
             </div>
         </div>
