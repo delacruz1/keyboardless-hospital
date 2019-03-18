@@ -9,37 +9,38 @@
     forceTLS: true
   });
 
+  pusher.subscribe("my")
 
 </script>
-
-<p>
-  Try publishing an event to channel <code>my-channel</code>
-  with event name <code>my-event</code>.
-</p>
+<div class="background">
 
 
-<div class="container">
-  <div class="row">
-    <div class="col text-center">
-      <h1>Keyboardless Hosptial GUI</h1>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <!-- <script>
-            var channel = pusher.subscribe('field-feed');
-            channel.bind('field-event', this.getUser(), jquery('.pusher-channel').add('{{param}}: <input value={{asyncData[param]}}>')}
-            );
-          </script> -->
-            <div class="pusher-channel" *ngFor="let param of paramsData">
-                {{param}}: <input value={{asyncData[param]}}>
-            </div>
+    <div class=container>    
+      <div class="row">
+        <div class="col text-center">
+            <img src="https://www.secure-24.com/wp-content/uploads/2015/03/SAP-Logo-transparent-bkgrd1-1024x507.png" height="110" width="300"/>
+            <h1>Keyboardless Hospital</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <!-- <div class="card"> -->
+            <!-- <div class="card-body"> -->
+                <div class="pusher-channel" *ngFor="let param of paramsData">
+                    <div class="card">
+                      <div class="card-body">
+                          <b>{{param}}:  </b> <input value={{asyncData[param]}}>
+                      </div>
+                    </div> 
+                    <br>
+                    <!-- {{param}}: <input value={{asyncData[param]}}> -->
+                </div>
+            <!-- </div> -->
+          <!-- </div> -->
         </div>
       </div>
     </div>
-  </div>
+    
+  <script src="https://js.pusher.com/4.4/pusher.min.js"></script>
+  <router-outlet></router-outlet>
 </div>
-<script src="https://js.pusher.com/4.4/pusher.min.js"></script>
-<router-outlet></router-outlet>
