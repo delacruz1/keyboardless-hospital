@@ -22,15 +22,24 @@ app = Flask(__name__)
 
 @app.route('/')
 def root():
-    # For the sake of example, use static information to inflate the template.
-    # This will be replaced with real information in later steps.
-    dummy_times = [datetime.datetime(2018, 1, 1, 10, 0, 0),
-                   datetime.datetime(2018, 1, 2, 10, 30, 0),
-                   datetime.datetime(2018, 1, 3, 11, 0, 0),
-                   ]
+    dummy_time = ["hater oclock"]
+    return render_template('index.html', times=dummy_time)
 
-    return render_template('index.html', times=dummy_times)
-
+@app.route('/mySurveys.html')
+def mySurveyPage():
+    my_dummy_surveys = [
+    {
+        "surveyName" : "Dr. Ziv Pre-Appointment Questionnaire",
+        "surveyCo" : "UCI Optometrist",
+        "surveyIntro" : "This is a preliminary questionnaire that will give Dr. Ziv and co. an idea on the state of your current health. We will use this survey to evaluate any concerns and to limit your waiting time to best fit your experience at our office."
+    },
+    {
+        "surveyName" : "Dr. Peter Anteater Post Survey Request",
+        "surveyCo" : "Supreme Leader of UCI",
+        "surveyIntro" : "Fill this out NOW."
+    }]
+    #my_dummy_surveys = ["hello",]
+    return render_template('mySurveys.html', mySurveys=my_dummy_surveys)
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
