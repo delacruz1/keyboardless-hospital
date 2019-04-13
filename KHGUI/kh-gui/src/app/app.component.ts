@@ -35,7 +35,7 @@ export class AppComponent {
   ngOnInit(){
     setTimeout(function(){
      window.location.reload(true);
-    }, 2000);
+    }, 5000);
      this.getUser();
    }
    ​
