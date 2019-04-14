@@ -14,8 +14,9 @@
 
 # [START gae_python37_render_template]
 import datetime
-
 from flask import Flask, render_template
+from dynamodbOps import *
+
 
 app = Flask(__name__)
 
@@ -30,8 +31,8 @@ def mySurveyPage():
     my_dummy_surveys = [
     {
         "surveyName" : "Dr. Ziv Pre-Appointment Questionnaire",
-        "surveyCo" : "UCI Optometrist",
-        "surveyIntro" : "This is a preliminary questionnaire that will give Dr. Ziv and co. an idea on the state of your current health. We will use this survey to evaluate any concerns and to limit your waiting time to best fit your experience at our office."
+        "surveyCo" : "UCI Dentist",
+        "surveyIntro" : "You gotta floss, according to Ziv's Law."
     },
     {
         "surveyName" : "Dr. Peter Anteater Post Survey Request",
@@ -40,6 +41,21 @@ def mySurveyPage():
     }]
     #my_dummy_surveys = ["hello",]
     return render_template('mySurveys.html', mySurveys=my_dummy_surveys)
+
+@app.route('/receivedSurveys.html')
+def receivedSurveysPage():
+    received_dummy_surveys = [
+    {
+        "surveyName" : "Dr. Browne Appointment Survey",
+        "surveyCo" : "UCI Optometrist",
+        "surveyIntro" : "This is a preliminary questionnaire that will give Dr. Browne and co. an idea on the state of your current health. We will use this survey to evaluate any concerns and to limit your waiting time to best fit your experience at our office."
+    }]
+    return render_template('receivedSurveys.html', receivedSurveys=received_dummy_surveys)
+
+@app.route('/survey1.html')
+def testSurveyPage():
+    
+    return render_template('survey1.html')
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
