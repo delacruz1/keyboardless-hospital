@@ -36,17 +36,21 @@
           </nav>
           <div class="collapse" id="navbarToggleExternalContent">
             <div class="bg-dark p-4">
-              <h6 class="text-white">Close x</h6>
+              <!-- <h6 class="text-white">Close x</h6> -->
               <br>
-              <button class="menuOptions text-white" style="">My Surveys</button>
+              <a href="./mySurveys.html">
+                <button class="menuOptions text-white" style="">My Surveys</button>
+              </a>
               <br>
-              <button class="menuOptions text-white" style="">Received Surveys</button>
+              <a href="./receivedSurveys.html">
+                <button class="menuOptions text-white" style="">Received Surveys</button>
+              </a>
               <br>
               <button class="menuOptions text-white" style="">Settings</button>
             </div>
           </div>
         </div>
-    <h1 class="text-black">My Surveys!</h1>
+    <h1 class="text-black">My Surveys</h1>
     {% for my_survey in mySurveys %}
     <div class="card" style="width: 18rem;">
       <div class="card-body">

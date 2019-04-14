@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ask-sdk": "^2.5.1"
+    "ask-sdk": "^2.5.1",
+    "aws-sdk": "^2.437.0"
   }
 }
