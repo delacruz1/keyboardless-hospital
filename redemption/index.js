@@ -17,6 +17,11 @@ const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.Docu
  */
 var attributes = {};
 
+//This keeps track of the previous slot that was just elicited.
+//Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
+//time BeginFormHandler is called.
+var previousSlot = {"field": null, "fieldValue": null}
+
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
  * survey that we start.
@@ -35,6 +40,22 @@ function initializeDBField(){
     ReturnValues: 'ALL_OLD'
   };
   docClient.put(params).promise();
+}
+
+/**This function sets the global object previousSlot based on the slot that
+ * that was just elicited.
+ * Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
+ * time BeginFormHandler is called.
+ */
+function findPreviouslyElicitedSlot(handlerInput){
+  Object.keys(handlerInput.requestEnvelope.request.intent.slots).forEach(key => {
+    if(handlerInput.requestEnvelope.request.intent.slots[key]["value"] != 
+      attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]["slots"][key]["value"]){
+        previousSlot["field"] = key;
+        previousSlot["fieldValue"] =  handlerInput.requestEnvelope.request.intent.slots[key]["value"]
+      }
+    
+  });
 }
 
 /**This function does not work yet. It will potentially take care of
@@ -59,7 +80,7 @@ function updateFields(field, fieldValue){
     },
     UpdateExpression: dynamicUpdateExpression,
     ExpressionAttributeValues:{
-        dynamicExpressionAttributeValue:fieldValue
+        [dynamicExpressionAttributeValue]:fieldValue
     },
     ReturnValues:"UPDATED_NEW"
 };
@@ -137,6 +158,18 @@ const BeginFormHandler = {
     }
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED"){
       console.log("INCOMPLETE SURVEY");
+        //Check if the survey is in progress, and if so, check the previous slot value
+        //and update the database accordingly.
+        if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
+          findPreviouslyElicitedSlot(handlerInput);
+          console.log("PREVIOUS SLOT: " + previousSlot)
+          //Safe guard just to make sure that previous slot in fact has a value
+          if(previousSlot["field"]){
+            updateFields(previousSlot["field"], previousSlot["fieldValue"])
+          }
+        }
+        //Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
+        //time BeginFormHandler is called.
         attributes["temp_" + handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
 
         return handlerInput.responseBuilder
