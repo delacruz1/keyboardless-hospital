@@ -22,6 +22,8 @@ var attributes = {};
 //time BeginFormHandler is called.
 var previousSlot = {"field": null, "fieldValue": null}
 
+var slotOrder = [];
+
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
  * survey that we start.
@@ -40,6 +42,22 @@ function initializeDBField(){
     ReturnValues: 'ALL_OLD'
   };
   docClient.put(params).promise();
+}
+
+function loadModel(){
+  const fs = require('fs');
+  const fileContents = fs.readFileSync('./model.json', 'utf8');
+
+  try {
+    const data = JSON.parse(fileContents)
+    //Will need to make sure we select the current survey (intent) rather than saying [5]
+    slots = data.interactionModel.languageModel.intents[5].slots
+    slots.forEach((item) => {
+      slotOrder.push(item.name);
+    })
+  } catch(err) {
+    console.error(err);
+  }
 }
 
 /**This function sets the global object previousSlot based on the slot that
@@ -151,18 +169,16 @@ const BeginFormHandler = {
       && handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
   },
   handle(handlerInput) {
-    console.log("IN SURVEY HANDLER, STATUS: " + handlerInput.requestEnvelope.request.dialogState);
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
-      console.log("CALLED INITIALIZE FIELDS");
+      loadModel()
+      console.log(slotOrder.toString());
       initializeDBField();
     }
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED"){
-      console.log("INCOMPLETE SURVEY");
         //Check if the survey is in progress, and if so, check the previous slot value
         //and update the database accordingly.
         if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
           findPreviouslyElicitedSlot(handlerInput);
-          console.log("PREVIOUS SLOT: " + previousSlot)
           //Safe guard just to make sure that previous slot in fact has a value
           if(previousSlot["field"]){
             updateFields(previousSlot["field"], previousSlot["fieldValue"])
@@ -177,7 +193,6 @@ const BeginFormHandler = {
        .getResponse()
     }
     else {
-      console.log("COMPLETE SURVEY");
         delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
 
         return handlerInput.responseBuilder

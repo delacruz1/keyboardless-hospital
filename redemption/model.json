@@ -1,0 +1,214 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "katara",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "TestSurvey",
+          "slots": [
+            {
+              "name": "name",
+              "type": "AMAZON.Person",
+              "samples": [
+                "{name}"
+              ]
+            },
+            {
+              "name": "age",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{age}"
+              ]
+            },
+            {
+              "name": "weight",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{weight} pounds",
+                "{weight}"
+              ]
+            },
+            {
+              "name": "reason",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{reason}"
+              ]
+            }
+          ],
+          "samples": [
+            "Dr. Brown Appointment Survey"
+          ]
+        },
+        {
+          "name": "TestFixField",
+          "slots": [
+            {
+              "name": "fieldToBeFixedValue",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{fieldToBeFixedValue}"
+              ]
+            },
+            {
+              "name": "fieldToBeFixed",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "Go to {fieldToBeFixed}"
+          ]
+        }
+      ],
+      "types": []
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "TestSurvey",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "name",
+              "type": "AMAZON.Person",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1282764452121.1071229519956"
+              }
+            },
+            {
+              "name": "age",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1051973715318.1070582189309"
+              }
+            },
+            {
+              "name": "weight",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1051973715318.556845020059"
+              }
+            },
+            {
+              "name": "reason",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1051973715318.1445808967869"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TestFixField",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "fieldToBeFixedValue",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1323001340820.926325518295"
+              }
+            },
+            {
+              "name": "fieldToBeFixed",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "SKILL_RESPONSE"
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.1282764452121.1071229519956",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is your name?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.848426295322.604875930358",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What value do you want this {fieldToBeFixed} to be?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1051973715318.1070582189309",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is your age?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1323001340820.926325518295",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What do you want {fieldToBeFixed} to be?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1051973715318.556845020059",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is your weight in pounds?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1051973715318.1445808967869",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is your reason for your visit with Dr. Browne?"
+          }
+        ]
+      }
+    ]
+  },
+  "version": "11"
+}
