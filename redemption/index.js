@@ -20,7 +20,10 @@ var attributes = {};
 //This keeps track of the previous slot that was just elicited.
 //Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
 //time BeginFormHandler is called.
-var previousSlot = {"field": null, "fieldValue": null}
+var previousElicitedSlot = {"field": null, "fieldValue": null}
+var currentSlot;
+var previousSlot;
+var nextSlot;
 
 var slotOrder = [];
 
@@ -60,7 +63,7 @@ function loadModel(){
   }
 }
 
-/**This function sets the global object previousSlot based on the slot that
+/**This function sets the global object previousElicitedSlot based on the slot that
  * that was just elicited.
  * Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
  * time BeginFormHandler is called.
@@ -69,8 +72,8 @@ function findPreviouslyElicitedSlot(handlerInput){
   Object.keys(handlerInput.requestEnvelope.request.intent.slots).forEach(key => {
     if(handlerInput.requestEnvelope.request.intent.slots[key]["value"] != 
       attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]["slots"][key]["value"]){
-        previousSlot["field"] = key;
-        previousSlot["fieldValue"] =  handlerInput.requestEnvelope.request.intent.slots[key]["value"]
+        previousElicitedSlot["field"] = key;
+        previousElicitedSlot["fieldValue"] =  handlerInput.requestEnvelope.request.intent.slots[key]["value"]
       }
     
   });
@@ -170,18 +173,55 @@ const BeginFormHandler = {
   },
   handle(handlerInput) {
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
+      //Load interaction model from model.json. Approach can be changed later
       loadModel()
-      console.log(slotOrder.toString());
+      //Initialize all necessary database fields
       initializeDBField();
+      //Since the dialog is barely starting, we know what the current and next slots are.
+      currentSlot = slotOrder[0];
+      nextSlot = slotOrder[1];
+      console.log("STARTED DIALOG, CURRENT SLOT: " + currentSlot);
+      console.log("STARTED DIALOG, NEXT SLOT: " + nextSlot);
     }
+
+    if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS"){
+      //Get the index of the current slot
+      currentIndex = slotOrder.indexOf(currentSlot);
+      //This is activated once one answer has been given. Get the 
+      if(slotOrder[currentIndex + 1]){
+        currentIndex += 1;
+        currentSlot = slotOrder[currentIndex];
+        if(slotOrder[currentIndex + 1]){
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+      }
+      console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
+      console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + currentSlot);
+      console.log("IN_PROGRESS DIALOG, NEXT SLOT: " + nextSlot);
+    } 
+    // set a boolean that checks that the normal flow is no longer being followed
+      // 
+      // if the original flow is not being followed (use the elicit slot directrive to prompt for the new (current) slots)
+          // (i.e DO NOT RETURN TO THE ORIGINAL FLOW)
+
+    //Check if the boolean mentioned above is false. That means we can continue with the normal flow
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED"){
         //Check if the survey is in progress, and if so, check the previous slot value
         //and update the database accordingly.
         if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
           findPreviouslyElicitedSlot(handlerInput);
           //Safe guard just to make sure that previous slot in fact has a value
-          if(previousSlot["field"]){
-            updateFields(previousSlot["field"], previousSlot["fieldValue"])
+          if(previousElicitedSlot["field"]){
+            updateFields(previousElicitedSlot["field"], previousElicitedSlot["fieldValue"])
           }
         }
         //Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
@@ -225,7 +265,23 @@ const FixFieldHandler = {
         && handlerInput.requestEnvelope.request.intent.slots.fieldToBeFixed.value;
     },
     handle(handlerInput) {
-        console.log("INTENT OBJECT (IN FIX INTENT): " + attributes[Object.keys(attributes)[0]]);
+        currentSlot = handlerInput.requestEnvelope.request.intent.slots.fieldToBeFixed.value;
+        currentIndex = slotOrder.indexOf(currentSlot);
+        if(slotOrder[currentIndex + 1]){
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+        console.log("JUMP FIXING, PREVIOUS SLOT: " + previousSlot);
+        console.log("JUMP FIXING, CURRENT SLOT: " + currentSlot);
+        console.log("JUMP FIXING, NEXT SLOT: " + nextSlot);
         const speakOutput = "What do you want the " + handlerInput.requestEnvelope.request.intent.slots.fieldToBeFixed.value + " to be?"
       return handlerInput.responseBuilder
          .speak(speakOutput)
@@ -234,12 +290,15 @@ const FixFieldHandler = {
          and place it in (I'm assuming) the first empty slot. I thought addElicitSlotDirective would handle this easily,
          but I guess it doesn't.
          */
+        // This is where the specific slot to be prompted is done.
         .addElicitSlotDirective(handlerInput.requestEnvelope.request.intent.slots.fieldToBeFixed.value, 
             attributes[Object.keys(attributes)[0]])
         .getResponse();
     }
   }
-
+  
+  // for next & previous handlers pass the next slot or previous slot variables tothe elicit slot directive
+  // be sure to update the varibles as well, and set the flowChanged boolean to false 
 
 //Default Handlers, need to explore and utilize more!
 const HelpHandler = {
