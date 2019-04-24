@@ -184,34 +184,19 @@ const BeginFormHandler = {
       console.log("STARTED DIALOG, CURRENT SLOT: " + currentSlot);
       console.log("STARTED DIALOG, NEXT SLOT: " + nextSlot);
     }
-    // if the flow is changed the slots will be advanced one COMPLETE THIS & UPDATE ATTRIBUTES!
-    if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS" && flowChanged){
-      //Get the index of the current slot
-      currentIndex = slotOrder.indexOf(currentSlot) + 2; // the current will now be one after the next
-      //This is activated once one answer has been given. Get the 
-      if(slotOrder[currentIndex + 1]){
-        currentIndex += 1;
-        currentSlot = slotOrder[currentIndex];
-        if(slotOrder[currentIndex + 1]){
-          nextSlot = slotOrder[currentIndex + 1];
+    
+    if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED"){
+        if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
+          findPreviouslyElicitedSlot(handlerInput);
+          if(previousElicitedSlot["field"]){
+            updateFields(previousElicitedSlot["field"], previousElicitedSlot["fieldValue"])
+          }
         }
-        else{
-          nextSlot = null;
-        }
-        if(slotOrder[currentIndex - 1]){
-          previousSlot = slotOrder[currentIndex - 1];
-        }
-        else{
-          previousSlot=  null;
-        }
-      }
-      console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
-      console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + currentSlot);
-      console.log("IN_PROGRESS DIALOG, NEXT SLOT: " + nextSlot);
+        attributes["temp_" + handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
     }
     // Should be prompted if the flow is changed
 
-    if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS" && !flowChanged){
+    if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS"){
       //Get the index of the current slot
       currentIndex = slotOrder.indexOf(currentSlot);
       //This is activated once one answer has been given. Get the 
@@ -222,6 +207,7 @@ const BeginFormHandler = {
           nextSlot = slotOrder[currentIndex + 1];
         }
         else{
+          flowChanged = false;
           nextSlot = null;
         }
         if(slotOrder[currentIndex - 1]){
@@ -235,27 +221,20 @@ const BeginFormHandler = {
       console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + currentSlot);
       console.log("IN_PROGRESS DIALOG, NEXT SLOT: " + nextSlot);
     }  
-    
     // set a boolean that checks that the normal flow is no longer being followed
       // 
       // if the original flow is not being followed (use the elicit slot directrive to prompt for the new (current) slots)
           // (i.e DO NOT RETURN TO THE ORIGINAL FLOW)
 
     //Check if the boolean mentioned above is false. That means we can continue with the normal flow
-    
-    if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && !flowChanged){
-        //Check if the survey is in progress, and if so, check the previous slot value
-        //and update the database accordingly.
-        if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
-          findPreviouslyElicitedSlot(handlerInput);
-          //Safe guard just to make sure that previous slot in fact has a value
-          if(previousElicitedSlot["field"]){
-            updateFields(previousElicitedSlot["field"], previousElicitedSlot["fieldValue"])
-          }
-        }
-        //Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
-        //time BeginFormHandler is called.
-        attributes["temp_" + handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
+    if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && flowChanged){
+        return handlerInput.responseBuilder
+       .speak("What do you want the " + currentSlot + " to be?")
+       .reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+       .addElicitSlotDirective(currentSlot, handlerInput.requestEnvelope.request.intent)
+       .getResponse()
+    }
+    else if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && !flowChanged){
         return handlerInput.responseBuilder
        .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
        .getResponse()
@@ -265,10 +244,11 @@ const BeginFormHandler = {
 
         return handlerInput.responseBuilder
        .speak("Thank you for submitting your responses, Armando! This has been the Redemption Skill.")
+       //Confirmations
        .getResponse()
     }
   }
-} 
+};
 
 const PreviousHandler = {
   canHandle(handlerInput) {
@@ -276,6 +256,7 @@ const PreviousHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'PreviousSlot';
   },
   handle(handlerInput) {
+    flowChanged = true;
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     
     return handlerInput.responseBuilder
@@ -286,20 +267,47 @@ const PreviousHandler = {
       .getResponse();
   },
 };
+
 const NextHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'NextSlot';
   },
   handle(handlerInput) {
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    
-    return handlerInput.responseBuilder
-      .speak(sessionAttributes.speakOutput)
-      .reprompt(sessionAttributes.repromptSpeech)
-      .addElicitSlotDirective(nextSlot, 
+  flowChanged = true;
+    currentIndex = slotOrder.indexOf(currentSlot);
+      //This is activated once one answer has been given. Get the 
+      if(slotOrder[currentIndex + 1]){
+        currentIndex += 1;
+        currentSlot = slotOrder[currentIndex];
+        if(slotOrder[currentIndex + 1]){
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+        console.log("NEXT INTENT, PREVIOUS SLOT: " + previousSlot);
+        console.log("NEXT INTENT, CURRENT SLOT: " + currentSlot);
+        console.log("NEXT INTENT, NEXT SLOT: " + nextSlot);
+
+        return handlerInput.responseBuilder
+      .speak("What do you want the " + currentSlot + " to be?")
+      .reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+      .addElicitSlotDirective(currentSlot,
             attributes[Object.keys(attributes)[0]])
       .getResponse();
+      }
+      else{
+        return handlerInput.responseBuilder
+        .speak("You have reached the end of the survey.")
+        //Finish Later
+      }
   },
 };
 
@@ -446,6 +454,8 @@ exports.handler = skillBuilder
     LaunchRequestHandler,
     BeginFormHandler,
     FixFieldHandler,
+    PreviousHandler,
+    NextHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
