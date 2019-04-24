@@ -17,14 +17,15 @@ const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.Docu
  */
 var attributes = {};
 
-//This keeps track of the previous slot that was just elicited.
-//Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
-//time BeginFormHandler is called.
+// This keeps track of the previous slot that was just elicited.
+// Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
+// time BeginFormHandler is called.
 var previousElicitedSlot = {"field": null, "fieldValue": null}
 var currentSlot;
 var previousSlot;
 var nextSlot;
-
+var norm
+var flowChanged = false;
 var slotOrder = [];
 
 /** This function is to initialize the fields of a survey inside the database
@@ -143,7 +144,7 @@ const LaunchRequestHandler = {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-    const speakOutput = "Hello, Armando. which survey do you want to fill out?";
+    const speakOutput = "Hello, Ligma. which survey do you want to fill out?";
     const repromptSpeech = "Sorry, which survey do you want to fill out?";
 
     return handlerInput.responseBuilder
@@ -183,8 +184,34 @@ const BeginFormHandler = {
       console.log("STARTED DIALOG, CURRENT SLOT: " + currentSlot);
       console.log("STARTED DIALOG, NEXT SLOT: " + nextSlot);
     }
+    // if the flow is changed the slots will be advanced one COMPLETE THIS & UPDATE ATTRIBUTES!
+    if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS" && flowChanged){
+      //Get the index of the current slot
+      currentIndex = slotOrder.indexOf(currentSlot) + 2; // the current will now be one after the next
+      //This is activated once one answer has been given. Get the 
+      if(slotOrder[currentIndex + 1]){
+        currentIndex += 1;
+        currentSlot = slotOrder[currentIndex];
+        if(slotOrder[currentIndex + 1]){
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+      }
+      console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
+      console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + currentSlot);
+      console.log("IN_PROGRESS DIALOG, NEXT SLOT: " + nextSlot);
+    }
+    // Should be prompted if the flow is changed
 
-    if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS"){
+    if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS" && !flowChanged){
       //Get the index of the current slot
       currentIndex = slotOrder.indexOf(currentSlot);
       //This is activated once one answer has been given. Get the 
@@ -207,14 +234,16 @@ const BeginFormHandler = {
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
       console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + currentSlot);
       console.log("IN_PROGRESS DIALOG, NEXT SLOT: " + nextSlot);
-    } 
+    }  
+    
     // set a boolean that checks that the normal flow is no longer being followed
       // 
       // if the original flow is not being followed (use the elicit slot directrive to prompt for the new (current) slots)
           // (i.e DO NOT RETURN TO THE ORIGINAL FLOW)
 
     //Check if the boolean mentioned above is false. That means we can continue with the normal flow
-    if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED"){
+    
+    if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && !flowChanged){
         //Check if the survey is in progress, and if so, check the previous slot value
         //and update the database accordingly.
         if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
@@ -227,7 +256,6 @@ const BeginFormHandler = {
         //Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
         //time BeginFormHandler is called.
         attributes["temp_" + handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
-
         return handlerInput.responseBuilder
        .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
        .getResponse()
@@ -240,7 +268,40 @@ const BeginFormHandler = {
        .getResponse()
     }
   }
-}
+} 
+
+const PreviousHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'PreviousSlot';
+  },
+  handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    
+    return handlerInput.responseBuilder
+      .speak(sessionAttributes.speakOutput)
+      .reprompt(sessionAttributes.repromptSpeech)
+      .addElicitSlotDirective(previousSlot, 
+            attributes[Object.keys(attributes)[0]])
+      .getResponse();
+  },
+};
+const NextHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'NextSlot';
+  },
+  handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    
+    return handlerInput.responseBuilder
+      .speak(sessionAttributes.speakOutput)
+      .reprompt(sessionAttributes.repromptSpeech)
+      .addElicitSlotDirective(nextSlot, 
+            attributes[Object.keys(attributes)[0]])
+      .getResponse();
+  },
+};
 
 /**This handler checks if the TestFixField intent has been activated by the user AND if
  * the fieldToBeFixed slot's value indeed has a value. (The value is provided when the
