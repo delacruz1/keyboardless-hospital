@@ -15,18 +15,30 @@ const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.Docu
  * the user decides to fix a field. The key is the intent name (with 'temp_' prefixed
  * to it) and the value is the intent object, which represents the state of the intent.
  */
-var attributes = {};
+var attributes;
 
 // This keeps track of the previous slot that was just elicited.
 // Do NOT call findPreviouslyElicitedSlot after the attributes value has been reset until the next
 // time BeginFormHandler is called.
 var previousElicitedSlot = {"field": null, "fieldValue": null}
+
+/**These three fields keep track of the current, previous, and next slot being elicited. */
 var currentSlot;
 var previousSlot;
 var nextSlot;
+
+/**@Carlos, what is norm for? */
 var norm
-var flowChanged = false;
-var slotOrder = [];
+
+/**flowChanged is a boolean that is false if the flow of the conversation is completely linear, and
+ * false if we skip over a question (next).
+ */
+var flowChanged;
+
+/**This variable is a list that contains the order of the slots. This is populated in the BeginFormHandler after
+ * we load the interaction model into the code.
+ */
+var slotOrder;
 
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
@@ -48,6 +60,8 @@ function initializeDBField(){
   docClient.put(params).promise();
 }
 
+
+/**This function loads the interaction model from model.json. It is used to populate slotOrder. */
 function loadModel(){
   const fs = require('fs');
   const fileContents = fs.readFileSync('./model.json', 'utf8');
@@ -133,20 +147,23 @@ function updateFields(field, fieldValue){
  /** This Launch handler simply speaks to the user upon invocation (invocation means
   * activating the skill, (AKA when they say "Open Katara"). It will then prompt the
   * user to announce which survey they want to fill out.
-  * For now, the only survey available is "Dr Brown Appointment Survey"
+  * For now, the only survey available is "Dr Brown Appointment Survey".
+  * This handler also resets all of the necessary global variables.
   */
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    attributes = {};
+    flowChanged = false;
+    slotOrder = [];
+    //const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    //handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
     const speakOutput = "Hello, Ligma. which survey do you want to fill out?";
     const repromptSpeech = "Sorry, which survey do you want to fill out?";
-
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
@@ -156,16 +173,36 @@ const LaunchRequestHandler = {
 
 /**This hander handles the TestSurvey Intent (AKA the Dr. Brown Appointment SUrvey). It 
  * essentially checks if this is the appropriate handler to handle the TestSurvey intent, 
- * then 
- * 1) initializes the database's fields upon starting the survey. (This will change later 
- *    depending on how we proceed.) 
- * 2) Then it checks if the dialog state is incomeplete, and if so, continue to delegate the 
- *    converation (and thus, elicitation of slots) to the Alexa. When this happens, the state
- *    of the survey is saved into the attributes object just in case the user decides to fix
- *    any field.
+ * then
+ * 1) It checks to see if the dialogState has started (Meaning it checks if no questions have been answered yet.)
+ *    a) It calls loadModel() to populate slotOrder
+ *    b) initializes the database's fields upon starting the survey. (This will change later 
+ *    depending on how we proceed.)
+ *    c) Set the current and next slot variables as the first and second field, respectively.
+ * 2) If the survey is not complete yet, then we find the slot that was just elicited (if there is one)
+ *    and update the database accordingly. We also update the attributes object. Should probably move this
+ *    to the next conditional as it shouldn't make a difference.
+ * 3) If the survey is in progress, meaning at least one question has been answered, then
+ *    a) Check if there is in fact a next slot in the slotOrder. If so, set this as the new currentSlot
+ *    b) If there is a next slot after our new current slot, then set that as the next slot, otherwise set
+ *       it to null
+ *    c) If there is a previous slot before our new current slot, then set that as the previous slot,
+ *       otherwise set it to null.
+ *    d) If we have reached the end of the survey (we answered the last question), then check here if the
+ *       flow has changed. If so, return a response that lets the user know that they have reached the
+ *       end of the survey but have not answered all of the questions. It prompts them if they wish to
+ *       review it or go back to it later. This will change depending on design decision. This part has not
+ *       been built yet.
+ * 4) If the survey is incomplete AND the flow has changed (next has been called and original flow
+ *    has not been restored), then manually elicit the current slot. This differs with delegating the 
+ *    conversation to Alexa since the Alexa will find the first unfilled slot by default and prompt the
+ *    user with that. We do not want that; we want the conversation to proceed, thereby making this
+ *    conditional necessary.
+ * 5) If the survey is incomplete and the the flow has NOT been changed, we continue to delegate the 
+ *    converation (and thus, elicitation of slots) to the Alexa.
  * 3) If the dialog state is complete, then the state of the survey is deleted from the attributes
- *    object (not sure if it should be deleted?), and the Alexa will thank the user for their submission.
- *    Ideally, it should ask the user if they want to submit, but eh, we'll get to that soon.
+ *    object (not sure if it should be deleted?), and the Alexa will thank the user for their submission
+ *    and ask if they want to review their answers, submit, or come back later. This part has not been built yet.
  */
 const BeginFormHandler = {
   canHandle(handlerInput) {
@@ -173,6 +210,8 @@ const BeginFormHandler = {
       && handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
   },
   handle(handlerInput) {
+    console.log("FLOW IN BEGIN: " + flowChanged);
+
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
       //Load interaction model from model.json. Approach can be changed later
       loadModel()
@@ -185,6 +224,7 @@ const BeginFormHandler = {
       console.log("STARTED DIALOG, NEXT SLOT: " + nextSlot);
     }
     
+    //Update the database if needed
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED"){
         if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
           findPreviouslyElicitedSlot(handlerInput);
@@ -196,6 +236,7 @@ const BeginFormHandler = {
     }
     // Should be prompted if the flow is changed
 
+    //Update the slot variables
     if(handlerInput.requestEnvelope.request.dialogState == "IN_PROGRESS"){
       //Get the index of the current slot
       currentIndex = slotOrder.indexOf(currentSlot);
@@ -207,7 +248,6 @@ const BeginFormHandler = {
           nextSlot = slotOrder[currentIndex + 1];
         }
         else{
-          flowChanged = false;
           nextSlot = null;
         }
         if(slotOrder[currentIndex - 1]){
@@ -216,6 +256,12 @@ const BeginFormHandler = {
         else{
           previousSlot=  null;
         }
+      }
+      else if(!slotOrder[currentIndex + 1] && flowChanged){
+        return handlerInput.responseBuilder
+        .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
       console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + currentSlot);
@@ -227,6 +273,7 @@ const BeginFormHandler = {
           // (i.e DO NOT RETURN TO THE ORIGINAL FLOW)
 
     //Check if the boolean mentioned above is false. That means we can continue with the normal flow
+    console.log("FLOW: " + flowChanged);
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && flowChanged){
         return handlerInput.responseBuilder
        .speak("What do you want the " + currentSlot + " to be?")
@@ -241,46 +288,35 @@ const BeginFormHandler = {
     }
     else {
         delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
-
         return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, Armando! This has been the Redemption Skill.")
+       .speak("Thank you for submitting your responses, Ligma! Do you want to review your responses, submit, or come back later?")
        //Confirmations
        .getResponse()
     }
   }
 };
 
+/**The Previous Handler will first check if the user's request is an intent request, and if that intent request
+ * corresponds to the PreviousSlot Intent. If it does:
+ * 1) It changes the slots accordingly, where the previous slot (if it exists) becomes the new current slot.
+ *    The next and previous slots are also set as needed.
+ * 2) If a previous slot exists, we manually prompt them. If not, then we mention that there are no previous questions,
+ *    and ask the user if they want to continue. This part has not been built yet.
+ */
 const PreviousHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'PreviousSlot';
   },
   handle(handlerInput) {
-    flowChanged = true;
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    
-    return handlerInput.responseBuilder
-      .speak(sessionAttributes.speakOutput)
-      .reprompt(sessionAttributes.repromptSpeech)
-      .addElicitSlotDirective(previousSlot, 
-            attributes[Object.keys(attributes)[0]])
-      .getResponse();
-  },
-};
-
-const NextHandler = {
-  canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'NextSlot';
-  },
-  handle(handlerInput) {
-  flowChanged = true;
     currentIndex = slotOrder.indexOf(currentSlot);
       //This is activated once one answer has been given. Get the 
-      if(slotOrder[currentIndex + 1]){
-        currentIndex += 1;
+      if(slotOrder[currentIndex - 1]){
+        currentIndex -= 1;
         currentSlot = slotOrder[currentIndex];
+        console.log(slotOrder);
         if(slotOrder[currentIndex + 1]){
+          console.log(slotOrder[currentIndex + 1]);
           nextSlot = slotOrder[currentIndex + 1];
         }
         else{
@@ -305,10 +341,67 @@ const NextHandler = {
       }
       else{
         return handlerInput.responseBuilder
-        .speak("You have reached the end of the survey.")
+        .speak("There are no previous questions. Do you want to continue?")
+        .reprompt("Hi Ligma. There are no previous questions. Do you want to continue?")
+        .getResponse();
         //Finish Later
       }
+  }
+};
+
+/**The Next Handler will first check if the user's request is an intent request, and if that intent request
+ * corresponds to the NextSlot Intent. If it does:
+ * 1) It changes the slots accordingly, where the next slot (if it exists) becomes the new current slot.
+ *    The next and previous slots are also set as needed.
+ * 2) If a next slot exists, we manually prompt them. If not, then we mention that they have reached the end of
+ *    the survey and have not finished. We ask them if they want to review it or come back to it later.
+ *    This part has not been built yet.
+ */
+const NextHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'NextSlot';
   },
+  handle(handlerInput) {
+    flowChanged = true;
+    currentIndex = slotOrder.indexOf(currentSlot);
+      //This is activated once one answer has been given. Get the 
+      if(slotOrder[currentIndex + 1]){
+        currentIndex += 1;
+        currentSlot = slotOrder[currentIndex];
+        console.log(slotOrder);
+        if(slotOrder[currentIndex + 1]){
+          console.log(slotOrder[currentIndex + 1]);
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+        console.log("NEXT INTENT, PREVIOUS SLOT: " + previousSlot);
+        console.log("NEXT INTENT, CURRENT SLOT: " + currentSlot);
+        console.log("NEXT INTENT, NEXT SLOT: " + nextSlot);
+
+        return handlerInput.responseBuilder
+      .speak("What do you want the " + currentSlot + " to be?")
+      .reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+      .addElicitSlotDirective(currentSlot,
+            attributes[Object.keys(attributes)[0]])
+      .getResponse();
+      }
+      else{
+        return handlerInput.responseBuilder
+        .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .getResponse();
+        //Finish Later
+      }
+  }
 };
 
 /**This handler checks if the TestFixField intent has been activated by the user AND if
