@@ -38,7 +38,7 @@
             <div class="bg-dark p-4">
               <!-- <h6 class="text-white">Close x</h6> -->
               <br>
-              <a href="./mySurveys.html">
+              <a href="./my_surveys.html">
                 <button class="menuOptions text-white" style="">My Surveys</button>
               </a>
               <br>
@@ -50,15 +50,15 @@
             </div>
           </div>
         </div>
-    <h1 class="text-black">My Surveys</h1>
-    {% for my_survey in mySurveys %}
-    <div class="card" style="width: 18rem;">
-      <div class="card-body">
-          <h5 class="card-title">{{ my_survey["surveyName"] }}</h5>
-          <h6 class="card-title">{{ my_survey["surveyCo"] }}</h6>
-          <p class="card-text">{{ my_survey["surveyIntro"] }}</p>
-          <a href="#" class="btn btn-primary">View Results</a>
-        </div>
+		<h2 class="text-black text-center">My Surveys</h2>
+		{% for my_survey in mySurveys %}
+		<div class="card text-center" style="width: 18rem;">
+		  <div class="card-body" style="float:none;margin:0 auto;">
+			  <h5 class="card-title">{{ my_survey[0]["SurveyName"] }}</h5>
+			  <h6 class="card-title">{{ my_survey[0]["surveyCo"] }}</h6>
+			  <p class="card-text">{{ my_survey["surveyIntro"] }}</p>
+			  <a href="view_survey.html?survey={{my_survey[1]}}" class="btn btn-primary">View Results</a>
+		</div>
       </div>
     </div>
     {% endfor %}

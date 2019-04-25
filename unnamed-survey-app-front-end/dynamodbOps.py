@@ -15,19 +15,28 @@ class DecimalEncoder(json.JSONEncoder):
                 return int(o)
         return super(DecimalEncoder, self).default(o)
 
-dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
 
-table = dynamodb.Table('Redemption')
+def table_query(table, keydict):
+    dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
+    table = dynamodb.Table(table)
+    item = None
+    try:
+        response = table.get_item(
+            Key=keydict
+        )
+    except ClientError as e:
+        print(e.response['Error']['Message'])
+    else:
+        item = response['Item']
+        print("GetItem succeeded:")
+        print(json.dumps(item, indent=4, cls=DecimalEncoder))
+    return item
 
-try:
-    response = table.get_item(
-        Key={
-            'userID': "1"
-        }
-    )
-except ClientError as e:
-    print(e.response['Error']['Message'])
-else:
-    item = response['Item']
-    print("GetItem succeeded:")
-    print(json.dumps(item, indent=4, cls=DecimalEncoder))
+def table_get_all(table, key=None):
+    dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
+    table = dynamodb.Table(table)
+    items = table.scan()["Items"]
+    if key != None:
+        items = [i for i in items if key(i)]
+    return items
+

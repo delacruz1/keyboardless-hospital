@@ -38,7 +38,7 @@
             <div class="bg-dark p-4">
                 <h6 class="text-white">Close x</h6>
                 <br>
-                <a href="./mySurveys.html">
+                <a href="./my_surveys.html">
                   <button class="menuOptions text-white" style="">My Surveys</button>
                 </a>
                 <br>
@@ -52,9 +52,37 @@
         </div>
 
 
-    <h1>Content goes here</h1>
-
-
+    <h1>Viewing {{my_survey["SurveyName"]}}</h1>
+	<table>
+	<tr>
+		<td><a href = "{{this_url}}&view=questions"><button type="button" class="btn btn-primary">Questions</button></a></td>
+		<td><a href = "{{this_url}}&view=responses"><button type="button" class="btn btn-primary">Responses</button></a></td>
+	</tr>
+	</table>
+	
+	<h3>{{view}}</h3>
+	{% if view == "questions" %}
+		{% for question in my_survey["Questions"] %}
+			{{question}}<br>
+		{% endfor %}
+	{% else %}
+		<table style="table-layout:fixed;width:100%;border:1px solid black;">
+			<tr>
+				<th>Name</th>
+				<th>Date of Birth</th>
+				<th>Sex</th>
+				<th>Cardiovascular History</th>
+			</tr>
+			{% for response in responses %}
+				<tr>
+					<td>{{response["Name"]}}</td>
+					<td>{{response["Date"]}}</td>
+					<td>{{response["Q1"]}}</td>
+					<td>{{response["Q2"]}}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	{% endif %}
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
