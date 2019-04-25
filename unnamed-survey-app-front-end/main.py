@@ -14,20 +14,21 @@
 
 # [START gae_python37_render_template]
 import datetime
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from dynamodbOps import *
 
 
 app = Flask(__name__)
 
-
 @app.route('/')
 def root():
     dummy_time = ["hater oclock"]
-    return render_template('index.html', times=dummy_time)
+    doc = table_get_all("Responses")
+    return render_template('index.html', times=dummy_time, doc=doc)
 
-@app.route('/mySurveys.html')
-def mySurveyPage():
+@app.route('/my_surveys.html')
+def mySurveysPage():
+    dr = "D2"
     my_dummy_surveys = [
     {
         "surveyName" : "Dr. Ziv Pre-Appointment Questionnaire",
@@ -40,22 +41,28 @@ def mySurveyPage():
         "surveyIntro" : "Fill this out NOW."
     }]
     #my_dummy_surveys = ["hello",]
-    return render_template('mySurveys.html', mySurveys=my_dummy_surveys)
+    so = table_get_all("Surveys", key=lambda x: {"DoctorID":dr} in x["DoctorAccess"])
+    survey_objs = []
+    for s in so:
+        url = s["SurveyName"].replace(" ", "%20")
+        survey_objs.append((s,url))
+    return render_template('my_surveys.html', mySurveys=survey_objs)
 
-@app.route('/receivedSurveys.html')
-def receivedSurveysPage():
-    received_dummy_surveys = [
-    {
-        "surveyName" : "Dr. Browne Appointment Survey",
-        "surveyCo" : "UCI Optometrist",
-        "surveyIntro" : "This is a preliminary questionnaire that will give Dr. Browne and co. an idea on the state of your current health. We will use this survey to evaluate any concerns and to limit your waiting time to best fit your experience at our office."
-    }]
-    return render_template('receivedSurveys.html', receivedSurveys=received_dummy_surveys)
-
-@app.route('/survey1.html')
-def testSurveyPage():
-    
-    return render_template('survey1.html')
+@app.route('/view_survey.html')
+def viewSurveyPage():
+    survey = request.args.get('survey')
+    view = request.args.get('view') if request.args.get('view') else "questions"
+    key    = survey.replace("%20", " ")
+    survey_obj = table_query("Surveys", {"SurveyName":key})
+    url = request.url[:request.url.find("&") if "&" in request.url else len(request.url)]
+    responses = [
+        {"Name":"Bob Smith","Date":"04/25/1995","Q1":"Male","Q2":"None"},
+        {"Name":"Jen Jones","Date":"03/15/1952","Q1":"Female","Q2":"Father with heart disease"},
+        {"Name":"Lucy Brown","Date":"08/14/2001","Q1":"Female","Q2":"None"},
+        {"Name":"Carol Brown","Date":"05/03/1977","Q1":"Non-Binary","Q2":"Mat. grandmother and mather died of heart disease"},
+        {"Name":"Dick Nixon","Date":"11/27/1984","Q1":"Male","Q2":"Had 5 previous heart attacks"}
+        ]
+    return render_template('view_survey.html', my_survey=survey_obj, view=view, this_url = url, responses=responses)
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
