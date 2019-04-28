@@ -2,6 +2,7 @@
 //We have these dependencies in our node_modules.
 const Alexa = require('ask-sdk-core');
 const awsSDK = require('aws-sdk');
+const { DynamoDbPersistenceAdapter } = require('ask-sdk-dynamodb-persistence-adapter');
 
 //Get the database table name. This will change later depending on how we proceed.
 const testFormTable = 'Redemption';
@@ -9,6 +10,14 @@ const testFormTable = 'Redemption';
 //Get a reference to DynamoDB and the DynamoDB DocumentClient. We only use the latter here.
 const db = new awsSDK.DynamoDB();
 const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.DocumentClient();
+
+//Creates an instance of a Persistence Adapter
+const persistenceAdapter = new DynamoDbPersistenceAdapter({
+    //Specifies table name in DB
+    tableName: 'KHConversationStates',
+    createTable: true //creates table above if it does not exist in the database
+});
+
 
 /**Important. This attributes object (objects in JS are like dictionaries in Python)
  * is to store the state of an survey (aka intent) so that we may reference it when
