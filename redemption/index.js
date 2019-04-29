@@ -336,7 +336,7 @@ const PreviousHandler = {
       .speak("What do you want the " + currentSlot + " to be?")
       .reprompt("Sorry, what do you want the " + currentSlot + " to be?")
       .addElicitSlotDirective(currentSlot,
-            attributes[Object.keys(attributes)[0]])
+            attributes[Object.keys(attributes)[0]])// at the moment we only have 1 attribute object 
       .getResponse();
       }
       else{
