@@ -16,6 +16,7 @@ const persistenceAdapter = new DynamoDbPersistenceAdapter({
     //Specifies table name in DB
     tableName: 'KHConversationStates',
     createTable: true //creates table above if it does not exist in the database
+    // still not sure if the two lines above this comment are the right approach to things
 });
 
 
@@ -121,7 +122,7 @@ function updateFields(field, fieldValue){
   let params = {
     TableName:testFormTable,
     Key:{
-        "userID":"1"
+        "userID":"1" // todo: have users get a generated user id
     },
     UpdateExpression: dynamicUpdateExpression,
     ExpressionAttributeValues:{
@@ -159,6 +160,9 @@ function updateFields(field, fieldValue){
   * For now, the only survey available is "Dr Brown Appointment Survey".
   * This handler also resets all of the necessary global variables.
   */
+
+
+// TODO: When skill is launched again, we should tell user where they left off
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
@@ -171,8 +175,8 @@ const LaunchRequestHandler = {
     //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     //handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-    const speakOutput = "Hello, Ligma. which survey do you want to fill out?";
-    const repromptSpeech = "Sorry, which survey do you want to fill out?";
+    const speakOutput = "Hello, user. Do you want to fill out a new form or begin where you left off?";
+    const repromptSpeech = "Sorry, I didn't quite get that. Would you like to begin a new form or begin where you left off?";
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
@@ -269,7 +273,7 @@ const BeginFormHandler = {
       else if(!slotOrder[currentIndex + 1] && flowChanged){
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
@@ -298,7 +302,7 @@ const BeginFormHandler = {
     else {
         delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
         return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, Ligma! Do you want to review your responses, submit, or come back later?")
+       .speak("Thank you for submitting your responses, user! Do you want to review your responses, submit, or come back later?")
        //Confirmations
        .getResponse()
     }
@@ -351,7 +355,7 @@ const PreviousHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no previous questions. Do you want to continue?")
-        .reprompt("Hi Ligma. There are no previous questions. Do you want to continue?")
+        .reprompt("Hi user. There are no previous questions. Do you want to continue?")
         .getResponse();
         //Finish Later
       }
@@ -406,7 +410,7 @@ const NextHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
         //Finish Later
       }
@@ -564,5 +568,6 @@ exports.handler = skillBuilder
     SessionEndedRequestHandler
   )
   //.addRequestInterceptors(LocalizationInterceptor)
+  .withPersistenceAdapter(persistenceAdapter) // tells Skill Builder to use persistence adapter
   .addErrorHandlers(ErrorHandler)
   .lambda();
