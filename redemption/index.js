@@ -60,7 +60,6 @@ function initializeDBField(){
   docClient.put(params).promise();
 }
 
-
 /**This function loads the interaction model from model.json. It is used to populate slotOrder. */
 function loadModel(){
   const fs = require('fs');
@@ -162,7 +161,7 @@ const LaunchRequestHandler = {
     //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     //handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-    const speakOutput = "Hello, Ligma. which survey do you want to fill out?";
+    const speakOutput = "Hello, user. which survey do you want to fill out?";
     const repromptSpeech = "Sorry, which survey do you want to fill out?";
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -260,7 +259,7 @@ const BeginFormHandler = {
       else if(!slotOrder[currentIndex + 1] && flowChanged){
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
@@ -289,7 +288,7 @@ const BeginFormHandler = {
     else {
         delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
         return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, Ligma! Do you want to review your responses, submit, or come back later?")
+       .speak("Thank you for submitting your responses, user! Do you want to review your responses, submit, or come back later?")
        //Confirmations
        .getResponse()
     }
@@ -342,7 +341,7 @@ const PreviousHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no previous questions. Do you want to continue?")
-        .reprompt("Hi Ligma. There are no previous questions. Do you want to continue?")
+        .reprompt("Hi user. There are no previous questions. Do you want to continue?")
         .getResponse();
         //Finish Later
       }
@@ -397,7 +396,7 @@ const NextHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
         //Finish Later
       }
@@ -461,6 +460,55 @@ const FixFieldHandler = {
   
   // for next & previous handlers pass the next slot or previous slot variables tothe elicit slot directive
   // be sure to update the varibles as well, and set the flowChanged boolean to false 
+
+  //Handles "I don't know responses. Bug where the last slot is not being asked. Will fix."***
+  const IDKHandler = {
+    canHandle(handlerInput) {
+      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'IDKIntent';
+    },
+    handle(handlerInput) {
+      // 2 options: Elaborate or skip question
+      if (handlerInput.requestEnvelope.request.intent.slots.option.value === "skip"){
+        flowChanged = true;
+        //Get the index of the current slot
+        currentIndex = slotOrder.indexOf(currentSlot);
+        //This is activated once one answer has been given. Get the 
+        if(slotOrder[currentIndex + 1]){
+          currentIndex += 1;
+          currentSlot = slotOrder[currentIndex];
+        if(slotOrder[currentIndex + 1]){
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+      }
+      outputSpeech = "What is your "+currentSlot+"?";
+        return handlerInput.responseBuilder
+        .speak("Okay, I'll take you to the next question. "+outputSpeech)
+        .addElicitSlotDirective(currentSlot, attributes[Object.keys(attributes)[0]])
+        .getResponse();
+
+      } 
+
+
+      return handlerInput.responseBuilder
+      .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
+      .getResponse();
+
+    }
+  };
+
+
+
+
 
 //Default Handlers, need to explore and utilize more!
 const HelpHandler = {
@@ -549,6 +597,7 @@ exports.handler = skillBuilder
     FixFieldHandler,
     PreviousHandler,
     NextHandler,
+    IDKHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
