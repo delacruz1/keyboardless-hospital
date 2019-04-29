@@ -60,7 +60,6 @@ function initializeDBField(){
   docClient.put(params).promise();
 }
 
-
 /**This function loads the interaction model from model.json. It is used to populate slotOrder. */
 function loadModel(){
   const fs = require('fs');
@@ -462,6 +461,55 @@ const FixFieldHandler = {
   // for next & previous handlers pass the next slot or previous slot variables tothe elicit slot directive
   // be sure to update the varibles as well, and set the flowChanged boolean to false 
 
+  //Handles "I don't know responses. Bug where the last slot is not being asked. Will fix."***
+  const IDKHandler = {
+    canHandle(handlerInput) {
+      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'IDKIntent';
+    },
+    handle(handlerInput) {
+      // 2 options: Elaborate or skip question
+      if (handlerInput.requestEnvelope.request.intent.slots.option.value === "skip"){
+        flowChanged = true;
+        //Get the index of the current slot
+        currentIndex = slotOrder.indexOf(currentSlot);
+        //This is activated once one answer has been given. Get the 
+        if(slotOrder[currentIndex + 1]){
+          currentIndex += 1;
+          currentSlot = slotOrder[currentIndex];
+        if(slotOrder[currentIndex + 1]){
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+      }
+      outputSpeech = "What is your "+currentSlot+"?";
+        return handlerInput.responseBuilder
+        .speak("Okay, I'll take you to the next question. "+outputSpeech)
+        .addElicitSlotDirective(currentSlot, attributes[Object.keys(attributes)[0]])
+        .getResponse();
+
+      } 
+
+
+      return handlerInput.responseBuilder
+      .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
+      .getResponse();
+
+    }
+  };
+
+
+
+
+
 //Default Handlers, need to explore and utilize more!
 const HelpHandler = {
   canHandle(handlerInput) {
@@ -549,6 +597,7 @@ exports.handler = skillBuilder
     FixFieldHandler,
     PreviousHandler,
     NextHandler,
+    IDKHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
