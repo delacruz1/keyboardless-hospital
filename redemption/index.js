@@ -161,7 +161,7 @@ const LaunchRequestHandler = {
     //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     //handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-    const speakOutput = "Hello, Ligma. which survey do you want to fill out?";
+    const speakOutput = "Hello, user. which survey do you want to fill out?";
     const repromptSpeech = "Sorry, which survey do you want to fill out?";
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -259,7 +259,7 @@ const BeginFormHandler = {
       else if(!slotOrder[currentIndex + 1] && flowChanged){
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
@@ -288,7 +288,7 @@ const BeginFormHandler = {
     else {
         delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
         return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, Ligma! Do you want to review your responses, submit, or come back later?")
+       .speak("Thank you for submitting your responses, user! Do you want to review your responses, submit, or come back later?")
        //Confirmations
        .getResponse()
     }
@@ -341,7 +341,7 @@ const PreviousHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no previous questions. Do you want to continue?")
-        .reprompt("Hi Ligma. There are no previous questions. Do you want to continue?")
+        .reprompt("Hi user. There are no previous questions. Do you want to continue?")
         .getResponse();
         //Finish Later
       }
@@ -396,7 +396,7 @@ const NextHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
         //Finish Later
       }
