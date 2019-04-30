@@ -63,7 +63,6 @@ function initializeDBField(){
   docClient.put(params).promise();
 }
 
-
 /**This function loads the interaction model from model.json. It is used to populate slotOrder. */
 function loadModel(){
   const fs = require('fs');
@@ -175,6 +174,7 @@ const LaunchRequestHandler = {
     //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     //handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+
     const speakOutput = "Hello, User. which survey do you want to fill out?";
     const repromptSpeech = "Sorry, which survey do you want to fill out?";
     return handlerInput.responseBuilder
@@ -418,6 +418,7 @@ const NextHandler = {
         return handlerInput.responseBuilder
         .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+
         .getResponse();
         //Finish Later
       }
@@ -527,6 +528,7 @@ const FixFieldHandler = {
     }
   };
 
+
 //Default Handlers, need to explore and utilize more!
 const HelpHandler = {
   canHandle(handlerInput) {
@@ -615,6 +617,7 @@ exports.handler = skillBuilder
     IDKHandler,
     PreviousHandler,
     NextHandler,
+    IDKHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
