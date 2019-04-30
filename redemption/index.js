@@ -43,6 +43,10 @@ var flowChanged;
  */
 var slotOrder;
 
+/** This variable is a list 
+ */
+var elaborations;
+
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
  * survey that we start.
@@ -164,7 +168,7 @@ const LaunchRequestHandler = {
                 "prior": "Any prior eye surgery or laser?",
                 "pressure":"Do you know what your highest eye pressre ever was?",
                 "effects":"Do you have any adverse side effects to any glaucoma eyedrops before?",
-                "faliure":"Do you have heart failure or asthma?",
+                "failure":"Do you have heart failure or asthma?",
                 "typicalPressure":"What’s your typical eye pressure when you were followed by your previous doctor?",
                 "spray":"Are you using any nasal spray, or systemic steroid medication?",
                 "trauma":"Any previous trauma to or near the eye since infancy?",
@@ -511,6 +515,12 @@ const FixFieldHandler = {
         else{
           previousSlot=  null;
         }
+      } else {
+        // elaborate
+
+        // store locally with new objects
+        //        --> then grab from database eventually
+
       }
       outputSpeech = "What is your "+currentSlot+"?";
         return handlerInput.responseBuilder
