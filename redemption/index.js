@@ -522,9 +522,8 @@ const FixFieldHandler = {
         //        --> then grab from database eventually
 
       }
-      outputSpeech = "What is your "+currentSlot+"?";
         return handlerInput.responseBuilder
-        .speak("Okay, I'll take you to the next question. "+outputSpeech)
+        .speak("Okay, I'll take you to the next question. "+slotDict[currentSlot])
         .addElicitSlotDirective(currentSlot, attributes[Object.keys(attributes)[0]])
         .getResponse();
 
