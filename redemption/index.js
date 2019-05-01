@@ -10,6 +10,9 @@ const testFormTable = 'Redemption';
 const db = new awsSDK.DynamoDB();
 const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.DocumentClient();
 
+// Object that contains the slots and utterances for the new questionaire
+var slotDict;
+
 /**Important. This attributes object (objects in JS are like dictionaries in Python)
  * is to store the state of an survey (aka intent) so that we may reference it when
  * the user decides to fix a field. The key is the intent name (with 'temp_' prefixed
@@ -28,7 +31,7 @@ var previousSlot;
 var nextSlot;
 
 /**@Carlos, what is norm for? */
-var norm
+var norm;
 
 /**flowChanged is a boolean that is false if the flow of the conversation is completely linear, and
  * false if we skip over a question (next).
@@ -39,6 +42,10 @@ var flowChanged;
  * we load the interaction model into the code.
  */
 var slotOrder;
+
+/** This variable is a list 
+ */
+var elaborations;
 
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
@@ -60,7 +67,6 @@ function initializeDBField(){
   docClient.put(params).promise();
 }
 
-
 /**This function loads the interaction model from model.json. It is used to populate slotOrder. */
 function loadModel(){
   const fs = require('fs');
@@ -69,7 +75,7 @@ function loadModel(){
   try {
     const data = JSON.parse(fileContents)
     //Will need to make sure we select the current survey (intent) rather than saying [5]
-    slots = data.interactionModel.languageModel.intents[5].slots
+    slots = data.interactionModel.languageModel.intents[10].slots
     slots.forEach((item) => {
       slotOrder.push(item.name);
     })
@@ -158,11 +164,22 @@ const LaunchRequestHandler = {
     attributes = {};
     flowChanged = false;
     slotOrder = [];
+    slotDict = {"history":"Any family history of glaucoma?",
+                "prior": "Any prior eye surgery or laser?",
+                "pressure":"Do you know what your highest eye pressre ever was?",
+                "effects":"Do you have any adverse side effects to any glaucoma eyedrops before?",
+                "failure":"Do you have heart failure or asthma?",
+                "typicalPressure":"What’s your typical eye pressure when you were followed by your previous doctor?",
+                "spray":"Are you using any nasal spray, or systemic steroid medication?",
+                "trauma":"Any previous trauma to or near the eye since infancy?",
+                "thinner":"Are you on blood thinner?",
+                "diabetes":"Do you have diabetes?"};
     //const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     //handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-    const speakOutput = "Hello, Ligma. which survey do you want to fill out?";
+
+    const speakOutput = "Hello, User. which survey do you want to fill out?";
     const repromptSpeech = "Sorry, which survey do you want to fill out?";
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -207,7 +224,8 @@ const LaunchRequestHandler = {
 const BeginFormHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === "IntentRequest"
-      && handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
+      && (handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
+      || handlerInput.requestEnvelope.request.intent.name === "KenSurvey")
   },
   handle(handlerInput) {
     console.log("FLOW IN BEGIN: " + flowChanged);
@@ -260,7 +278,7 @@ const BeginFormHandler = {
       else if(!slotOrder[currentIndex + 1] && flowChanged){
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
@@ -276,8 +294,10 @@ const BeginFormHandler = {
     console.log("FLOW: " + flowChanged);
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && flowChanged){
         return handlerInput.responseBuilder
-       .speak("What do you want the " + currentSlot + " to be?")
-       .reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+        .speak(slotDict[currentSlot])       
+       //.speak("What do you want the " + currentSlot + " to be?")
+       //.reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+       .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
        .addElicitSlotDirective(currentSlot, handlerInput.requestEnvelope.request.intent)
        .getResponse()
     }
@@ -289,7 +309,7 @@ const BeginFormHandler = {
     else {
         delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
         return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, Ligma! Do you want to review your responses, submit, or come back later?")
+       .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
        //Confirmations
        .getResponse()
     }
@@ -333,16 +353,18 @@ const PreviousHandler = {
         console.log("NEXT INTENT, NEXT SLOT: " + nextSlot);
 
         return handlerInput.responseBuilder
-      .speak("What do you want the " + currentSlot + " to be?")
-      .reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+      .speak(slotDict[currentSlot])
+      .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
+      //.speak("What do you want the " + currentSlot + " to be?")
+      //.reprompt("Sorry, what do you want the " + currentSlot + " to be?")
       .addElicitSlotDirective(currentSlot,
-            attributes[Object.keys(attributes)[0]])
+            attributes[Object.keys(attributes)[0]])// at the moment we only have 1 attribute object 
       .getResponse();
       }
       else{
         return handlerInput.responseBuilder
         .speak("There are no previous questions. Do you want to continue?")
-        .reprompt("Hi Ligma. There are no previous questions. Do you want to continue?")
+        .reprompt("Hi User. There are no previous questions. Do you want to continue?")
         .getResponse();
         //Finish Later
       }
@@ -388,8 +410,10 @@ const NextHandler = {
         console.log("NEXT INTENT, NEXT SLOT: " + nextSlot);
 
         return handlerInput.responseBuilder
-      .speak("What do you want the " + currentSlot + " to be?")
-      .reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+      .speak(slotDict[currentSlot])
+      .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
+      //.speak("What do you want the " + currentSlot + " to be?")
+      //.reprompt("Sorry, what do you want the " + currentSlot + " to be?")
       .addElicitSlotDirective(currentSlot,
             attributes[Object.keys(attributes)[0]])
       .getResponse();
@@ -397,7 +421,8 @@ const NextHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi Ligma. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+
         .getResponse();
         //Finish Later
       }
@@ -461,6 +486,57 @@ const FixFieldHandler = {
   
   // for next & previous handlers pass the next slot or previous slot variables tothe elicit slot directive
   // be sure to update the varibles as well, and set the flowChanged boolean to false 
+
+ //Handles "I don't know responses. Bug where the last slot is not being asked. Will fix."***
+  const IDKHandler = {
+    canHandle(handlerInput) {
+      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'IDKIntent';
+    },
+    handle(handlerInput) {
+      // 2 options: Elaborate or skip question
+      if (handlerInput.requestEnvelope.request.intent.slots.option.value === "skip"){
+        flowChanged = true;
+        //Get the index of the current slot
+        currentIndex = slotOrder.indexOf(currentSlot);
+        //This is activated once one answer has been given. Get the 
+        if(slotOrder[currentIndex + 1]){
+          currentIndex += 1;
+          currentSlot = slotOrder[currentIndex];
+        if(slotOrder[currentIndex + 1]){
+          nextSlot = slotOrder[currentIndex + 1];
+        }
+        else{
+          nextSlot = null;
+        }
+        if(slotOrder[currentIndex - 1]){
+          previousSlot = slotOrder[currentIndex - 1];
+        }
+        else{
+          previousSlot=  null;
+        }
+      } else {
+        // elaborate
+
+        // store locally with new objects
+        //        --> then grab from database eventually
+
+      }
+        return handlerInput.responseBuilder
+        .speak("Okay, I'll take you to the next question. "+slotDict[currentSlot])
+        .addElicitSlotDirective(currentSlot, attributes[Object.keys(attributes)[0]])
+        .getResponse();
+
+      } 
+
+
+      return handlerInput.responseBuilder
+      .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
+      .getResponse();
+
+    }
+  };
+
 
 //Default Handlers, need to explore and utilize more!
 const HelpHandler = {
@@ -547,8 +623,10 @@ exports.handler = skillBuilder
     LaunchRequestHandler,
     BeginFormHandler,
     FixFieldHandler,
+    IDKHandler,
     PreviousHandler,
     NextHandler,
+    IDKHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
