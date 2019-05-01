@@ -68,17 +68,15 @@
 	{% else %}
 		<table style="table-layout:fixed;width:100%;border:1px solid black;">
 			<tr>
-				<th>Name</th>
-				<th>Date of Birth</th>
-				<th>Sex</th>
-				<th>Cardiovascular History</th>
+				{% for question in my_survey["Questions"] %}
+					<th>{{question}}</th>
+				{% endfor %}
 			</tr>
 			{% for response in responses %}
 				<tr>
-					<td>{{response["Name"]}}</td>
-					<td>{{response["Date"]}}</td>
-					<td>{{response["Q1"]}}</td>
-					<td>{{response["Q2"]}}</td>
+					{% for question in my_survey["Questions"] %}
+						<td>{{response["Answers"][question]}}</td>
+					{% endfor %}
 				</tr>
 			{% endfor %}
 		</table>

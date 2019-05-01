@@ -28,18 +28,7 @@ def root():
 
 @app.route('/my_surveys.html')
 def mySurveysPage():
-    dr = "D2"
-    my_dummy_surveys = [
-    {
-        "surveyName" : "Dr. Ziv Pre-Appointment Questionnaire",
-        "surveyCo" : "UCI Dentist",
-        "surveyIntro" : "You gotta floss, according to Ziv's Law."
-    },
-    {
-        "surveyName" : "Dr. Peter Anteater Post Survey Request",
-        "surveyCo" : "Supreme Leader of UCI",
-        "surveyIntro" : "Fill this out NOW."
-    }]
+    dr = "D1"
     #my_dummy_surveys = ["hello",]
     so = table_get_all("Surveys", key=lambda x: {"DoctorID":dr} in x["DoctorAccess"])
     survey_objs = []
@@ -62,6 +51,8 @@ def viewSurveyPage():
         {"Name":"Carol Brown","Date":"05/03/1977","Q1":"Non-Binary","Q2":"Mat. grandmother and mather died of heart disease"},
         {"Name":"Dick Nixon","Date":"11/27/1984","Q1":"Male","Q2":"Had 5 previous heart attacks"}
         ]
+    responses = table_get_all("Responses", key=lambda x: x["SurveyName"] == key)
+    print(responses)
     return render_template('view_survey.html', my_survey=survey_obj, view=view, this_url = url, responses=responses)
 
 if __name__ == '__main__':
