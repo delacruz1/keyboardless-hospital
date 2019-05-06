@@ -184,6 +184,7 @@ const LaunchRequestHandler = {
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
+      .withSimpleCard("TEST", "TESTING CARD FEATURE")
       .getResponse();
   },
 };
@@ -279,6 +280,7 @@ const BeginFormHandler = {
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .withSimpleCard("TEST", "END OF SURVEY TEST")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
