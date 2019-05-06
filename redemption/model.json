@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "croissant",
+            "invocationName": "thanos",
             "intents": [
                 {
                     "name": "AMAZON.FallbackIntent",
@@ -54,13 +54,6 @@
                             "type": "AMAZON.SearchQuery",
                             "samples": [
                                 "{reason}"
-                            ]
-                        },
-                        {
-                            "name": "appointmentDate",
-                            "type": "AMAZON.DATE",
-                            "samples": [
-                                "{appointmentDate}"
                             ]
                         }
                     ],
@@ -194,6 +187,21 @@
                     "samples": [
                         "Dr. Ken Survey"
                     ]
+                },
+                {
+                    "name": "ContinueIntent",
+                    "slots": [
+                        {
+                            "name": "surveyName",
+                            "type": "SurveyNameType",
+                            "samples": [
+                                "{surveyName}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "Continue"
+                    ]
                 }
             ],
             "types": [
@@ -223,6 +231,27 @@
                         {
                             "name": {
                                 "value": "elaborate"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "SurveyNameType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "Dr. Ken Survey",
+                                "synonyms": [
+                                    "KenSurvey"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Dr. Brown Appointment Survey",
+                                "synonyms": [
+                                    "TestSurvey"
+                                ]
                             }
                         }
                     ]
@@ -270,15 +299,6 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.1051973715318.1445808967869"
-                            }
-                        },
-                        {
-                            "name": "appointmentDate",
-                            "type": "AMAZON.DATE",
-                            "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.262268744851.830270933648"
                             }
                         }
                     ]
@@ -418,6 +438,29 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "ContinueIntent",
+                    "delegationStrategy": "ALWAYS",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "surveyName",
+                            "type": "SurveyNameType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1529010474015.1299688959097"
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.170209144318.202363380212.824328470864"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "delegationStrategy": "SKILL_RESPONSE"
@@ -518,7 +561,7 @@
                 "variations": [
                     {
                         "type": "PlainText",
-                        "value": "Do you know what your highest eye pressre ever was?"
+                        "value": "Do you know what your highest eye pressure ever was?"
                     }
                 ]
             },
@@ -582,6 +625,78 @@
                     {
                         "type": "PlainText",
                         "value": "Do you have diabetes?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1529010474015.1299688959097",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Which survey would you like to continue?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.452333225784.1260122408873.1442295376882",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Sorry, I didn't quite get that. Try saying a date between January first, nineteen ninety, to may fifth, twenty nineteen"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.326723845821.1542516621308.1024002257081",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please choose a valid date"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.326723845821.1542516621308",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Appointment date?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.326723845821.393397135422",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "appointment date?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.326723845821.393397135422.634572788847",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please choose a valid date"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.326723845821.1373252364022",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "date?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.170209144318.202363380212.824328470864",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "I don't understand. Please say the name of an available survey."
                     }
                 ]
             }
