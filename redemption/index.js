@@ -47,6 +47,8 @@ var slotOrder;
  */
 var elaborations;
 
+var reviewSurvey;
+
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
  * survey that we start.
@@ -68,20 +70,29 @@ function initializeDBField(){
 }
 
 /**This function loads the interaction model from model.json. It is used to populate slotOrder. */
-function loadModel(){
+function loadModel(surveyName){
+  slotOrder = [];
   const fs = require('fs');
   const fileContents = fs.readFileSync('./model.json', 'utf8');
 
   try {
     const data = JSON.parse(fileContents)
     //Will need to make sure we select the current survey (intent) rather than saying [5]
-    slots = data.interactionModel.languageModel.intents[10].slots
-    slots.forEach((item) => {
-      slotOrder.push(item.name);
-    })
+    data.interactionModel.languageModel.intents.forEach((item) => {
+      if(item.name == surveyName){
+        item.slots.forEach((slot) => {
+          slotOrder.push(slot.name);
+        });
+      }
+    }); 
+    //slots = data.interactionModel.languageModel.intents[5].slots
+    // slots.forEach((item) => {
+    //   slotOrder.push(item.name);
+    // })
   } catch(err) {
     console.error(err);
   }
+  console.log(slotOrder);
 }
 
 /**This function sets the global object previousElicitedSlot based on the slot that
@@ -174,6 +185,7 @@ const LaunchRequestHandler = {
                 "trauma":"Any previous trauma to or near the eye since infancy?",
                 "thinner":"Are you on blood thinner?",
                 "diabetes":"Do you have diabetes?"};
+    reviewSurvey = null;
     //const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
@@ -184,7 +196,6 @@ const LaunchRequestHandler = {
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
-      .withSimpleCard("TEST", "TESTING CARD FEATURE")
       .getResponse();
   },
 };
@@ -233,7 +244,7 @@ const BeginFormHandler = {
 
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
       //Load interaction model from model.json. Approach can be changed later
-      loadModel()
+      loadModel(handlerInput.requestEnvelope.request.intent.name)
       //Initialize all necessary database fields
       initializeDBField();
       //Since the dialog is barely starting, we know what the current and next slots are.
@@ -280,7 +291,6 @@ const BeginFormHandler = {
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .withSimpleCard("TEST", "END OF SURVEY TEST")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
@@ -309,10 +319,10 @@ const BeginFormHandler = {
        .getResponse()
     }
     else {
-        delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
+        //delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
+        reviewSurvey = handlerInput.requestEnvelope.request.intent.name;
         return handlerInput.responseBuilder
        .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
-       //Confirmations
        .getResponse()
     }
   }
@@ -539,6 +549,41 @@ const FixFieldHandler = {
     }
   };
 
+  const ReviewHandler = {
+    canHandle(handlerInput) {
+      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'ReviewIntent';
+    },
+    handle(handlerInput) {
+      if(reviewSurvey || handlerInput.requestEnvelope.request.intent.slots.survey.value){
+        if(reviewSurvey){
+          cardTitle = reviewSurvey;
+        }
+        if(handlerInput.requestEnvelope.request.intent.slots.survey.value){
+          cardTitle = handlerInput.requestEnvelope.request.intent.slots.survey.value;
+        }
+        console.log(cardTitle);
+        attrKey = "temp_" + cardTitle;
+        content = ""
+        console.log(attrKey);
+        Object.keys(attributes[attrKey].slots).forEach((slot) => {
+          content += slot + ": " + slot.value + "\n";
+        })
+        console.log(content);
+        return handlerInput.responseBuilder
+        .speak("Okay, you can review your survey results if you have the Alexa app or Alexa smart device.")
+        .withStandardCard(cardTitle, "Testing")
+        .getResponse();
+      }
+      else{
+        return handlerInput.responseBuilder
+        .speak("Which survey do you want to review?")
+        .addElicitSlotDirective("survey")
+        .getResponse();
+      }
+    }
+  };
+
 
 //Default Handlers, need to explore and utilize more!
 const HelpHandler = {
@@ -629,6 +674,7 @@ exports.handler = skillBuilder
     PreviousHandler,
     NextHandler,
     IDKHandler,
+    ReviewHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
