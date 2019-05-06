@@ -344,13 +344,7 @@ const BeginFormHandler = {
       return new Promise((resolve, reject) => {
         handlerInput.attributesManager.getPersistentAttributes()
           .then((saveState) => {
-            const speechText = 'The robot is in the initial position.';
-  
-            //change
             saveState[handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
-
-            console.log("SAVED STATE: " + saveState);
-  
             handlerInput.attributesManager.setPersistentAttributes(saveState);
             handlerInput.attributesManager.savePersistentAttributes();
   
@@ -372,6 +366,8 @@ const BeginFormHandler = {
     }
   }
 };
+
+
 
 /**The Previous Handler will first check if the user's request is an intent request, and if that intent request
  * corresponds to the PreviousSlot Intent. If it does:
@@ -555,6 +551,7 @@ const ContinueHandler = {
       surveys = [];
       Object.keys(surveyNames).forEach((survey) => {
         if(Object.keys(saveState).includes(survey)){
+
           surveys.push(surveyNames[survey]);
         }
       });
