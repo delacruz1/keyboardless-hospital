@@ -52,6 +52,15 @@ var flowChanged;
  */
 var slotOrder;
 
+//Synonym
+var synonym;
+
+//intent names mapped to survey names
+var surveyNames = {
+  "TestSurvey": "Dr. Brown Appointment Survey",
+  "KenSurvey": "Dr. Ken Survey"
+}
+
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
  * survey that we start.
@@ -72,6 +81,23 @@ function initializeDBField(){
   docClient.put(params).promise();
 }
 
+function getSynonyms(valueName) {
+  const fs = require('fs');
+  const fileContents = fs.readFileSync('./model.json', 'utf8');
+  const data = JSON.parse(fileContents)
+  return data.interactionModel.languageModel.types.forEach((item) => {
+    if(item.name == "SurveyNameType"){
+      console.log("INSIDE FIRST IF");
+      item.values.forEach((typeValue) => {
+        if(typeValue.name.value == valueName){
+          console.log("INSIDE SECOND IF");
+          console.log("SYNONYM: " + typeValue.name.synonyms[0]);
+          synonym = typeValue.name.synonyms[0];
+        }
+      })
+    }
+  })
+}
 
 /**This function loads the interaction model from model.json. It is used to populate slotOrder. */
 function loadModel(surveyName){
@@ -320,6 +346,7 @@ const BeginFormHandler = {
           .then((saveState) => {
             const speechText = 'The robot is in the initial position.';
   
+            //change
             saveState[handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
 
             console.log("SAVED STATE: " + saveState);
@@ -523,9 +550,15 @@ const ContinueHandler = {
   async handle(handlerInput) {
     //return new Promise()
     const saveState = await handlerInput.attributesManager.getPersistentAttributes();
+    
     if(!handlerInput.requestEnvelope.request.intent.slots.surveyName.value){
-      surveys = Object.keys(saveState).join(", ");
-      const speakOutput = "What survey would you like to continue? You can say something like:" + surveys;
+      surveys = [];
+      Object.keys(surveyNames).forEach((survey) => {
+        if(Object.keys(saveState).includes(survey)){
+          surveys.push(surveyNames[survey]);
+        }
+      });
+      const speakOutput = "What survey would you like to continue? You can say something like:" + surveys.join(", ");
       return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt("Sorry, " + speakOutput)
@@ -535,9 +568,12 @@ const ContinueHandler = {
     //PROBLEM: Can't elicit the surveyNameslot because once the user says it, they will be directed to the survey intent itself rather than
     //         exxecute this line of code
     else{
+      console.log("IN SURVEY HANDLE FUNCTION ELSE STATEMENT");
+      console.log(saveState);
+      getSynonyms(handlerInput.requestEnvelope.request.intent.slots.surveyName.resolutions.resolutionsPerAuthority[0].values[0].value.name);
+      console.log(synonym);
       return handlerInput.responseBuilder
-      //Needs correct key
-      .addDelegateDirective(surveyState[handlerInput.requestEnvelope.request.intent.slots.surveyName.value])
+      .addDelegateDirective(saveState[synonym])
       .getResponse();
     }
   }
