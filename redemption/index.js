@@ -307,8 +307,6 @@ const BeginFormHandler = {
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && flowChanged){
         return handlerInput.responseBuilder
         .speak(slotDict[currentSlot])       
-       //.speak("What do you want the " + currentSlot + " to be?")
-       //.reprompt("Sorry, what do you want the " + currentSlot + " to be?")
        .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
        .addElicitSlotDirective(currentSlot, handlerInput.requestEnvelope.request.intent)
        .getResponse()
@@ -321,6 +319,7 @@ const BeginFormHandler = {
     else {
         //delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
         reviewSurvey = handlerInput.requestEnvelope.request.intent.name;
+        attributes["temp_" + reviewSurvey] = handlerInput.requestEnvelope.request.intent;
         return handlerInput.responseBuilder
        .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
        .getResponse()
@@ -367,8 +366,6 @@ const PreviousHandler = {
         return handlerInput.responseBuilder
       .speak(slotDict[currentSlot])
       .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
-      //.speak("What do you want the " + currentSlot + " to be?")
-      //.reprompt("Sorry, what do you want the " + currentSlot + " to be?")
       .addElicitSlotDirective(currentSlot,
             attributes[Object.keys(attributes)[0]])// at the moment we only have 1 attribute object 
       .getResponse();
@@ -568,11 +565,11 @@ const FixFieldHandler = {
         console.log(attrKey);
         Object.keys(attributes[attrKey].slots).forEach((slot) => {
           content += slot + ": " + slot.value + "\n";
-        })
+        });
         console.log(content);
         return handlerInput.responseBuilder
         .speak("Okay, you can review your survey results if you have the Alexa app or Alexa smart device.")
-        .withStandardCard(cardTitle, "Testing")
+        .withStandardCard(cardTitle, content)
         .getResponse();
       }
       else{
