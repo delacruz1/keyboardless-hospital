@@ -43,9 +43,22 @@ var flowChanged;
  */
 var slotOrder;
 
-/** This variable is a list 
+
+/** This variable is a list of responses that will be spoken back to the user from each response if the user chooses to 
+ * 1) skip the question and then 2) elaborate.
  */
-var elaborations;
+var elaborations = {"history":"Glaucoma is a group of eye conditions that damage the optic nerve, the health of which is vital for good vision. This damage is often caused by an abnormally high pressure in your eye and is one of the leading causes of blindness. Do you have any knowledge of any family member in the past that has experienced glaucoma?",
+"prior": "Have you had any surgecil procedures or laser applied to improve any condition of your eyes?",
+"pressure":"Eye pressure is measured in millimeters of mercury. Normal eye pressure ranges from 12 to 22 millimeters of mercury.",
+"effects":"Common side effects experienced with carbonic anhydrase inhibitor eye drops include burning, a bitter taste, eyelid reactions and eye redness. Have you experienced any of this or something different?",
+"failure":"Heart failure is the condition where your heart is not able to pump enough blood to meet the body's needs. Common symptoms of these are shortness of breath and major fatigue. Asthma is a condition in which your airways narrow and swell and produce extra mucus. This can make breathing difficult and trigger coughing, wheezing and shortness of breath.",
+"typicalPressure":"Eye pressure is measured in millimeters of mercury. Normal eye pressure ranges from 12 to 22 millimeters of mercury.",
+"spray":"Nasal spray is a medication that provides powerful nasal congestion relief.",
+"trauma":"Do you recall any previous injury, trauma or detrimental condition to the eye or nearby regions?",
+"thinner":"Blood thinners are medicines that prevent blood clots from forming. They also keep existing blood clots from getting larger. Are you on blood thinner?",
+"diabetes":"Diabetes is a disease in which your blood glucose, or blood sugar, levels are too high. Some symptoms include increased thirst, extreme hunger, and unexplained weight loss. Do you have diabetes?"};
+
+
 
 var reviewSurvey;
 
@@ -196,6 +209,9 @@ const LaunchRequestHandler = {
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
+      .withStandardCard("BEGIN TEST", "Lets see if the text will automatically adjust in size in order to fit this text? Will this work out?" +
+      "But fuck this assignment, why does the PDF feature not work how the fuck can I get it to work. I hate Alexa development, and I cant wait" +
+      " to graduate already and get out of UCI already. Lets make this text even longerAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
       .getResponse();
   },
 };
@@ -291,6 +307,9 @@ const BeginFormHandler = {
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .withStandardCard("END TEST", "Lets see if the text will automatically adjust in size in order to fit this text? Will this work out?" +
+        "But fuck this assignment, why does the PDF feature not work how the fuck can I get it to work. I hate Alexa development, and I cant wait" +
+        " to graduate already and get out of UCI already. Lets make this text even longerAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + previousSlot);
@@ -496,7 +515,7 @@ const FixFieldHandler = {
   // for next & previous handlers pass the next slot or previous slot variables tothe elicit slot directive
   // be sure to update the varibles as well, and set the flowChanged boolean to false 
 
- //Handles "I don't know responses. Bug where the last slot is not being asked. Will fix."***
+ //Handles "I don't know" responses from user.
   const IDKHandler = {
     canHandle(handlerInput) {
       return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -524,21 +543,20 @@ const FixFieldHandler = {
         else{
           previousSlot=  null;
         }
-      } else {
-        // elaborate
-
-        // store locally with new objects
-        //        --> then grab from database eventually
-
-      }
         return handlerInput.responseBuilder
         .speak("Okay, I'll take you to the next question. "+slotDict[currentSlot])
         .addElicitSlotDirective(currentSlot, attributes[Object.keys(attributes)[0]])
         .getResponse();
-
-      } 
-
-
+      } }
+        // Elaborate
+        if (handlerInput.requestEnvelope.request.intent.slots.option.value === "elaborate"){
+          return handlerInput.responseBuilder
+          .speak(elaborations[currentSlot])
+          .addElicitSlotDirective(currentSlot, attributes[Object.keys(attributes)[0]])
+          .getResponse();
+        }
+        //  * 1st phase design:  store locally with new objects
+        //  * 2nd phase design:  grab from database eventually
       return handlerInput.responseBuilder
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
@@ -667,7 +685,6 @@ exports.handler = skillBuilder
     LaunchRequestHandler,
     BeginFormHandler,
     FixFieldHandler,
-    IDKHandler,
     PreviousHandler,
     NextHandler,
     IDKHandler,
