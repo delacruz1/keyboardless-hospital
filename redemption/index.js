@@ -3,15 +3,24 @@
 const Alexa = require('ask-sdk-core');
 const awsSDK = require('aws-sdk');
 
+// Reference to the DynamoDB Persistence Adapter, which we need for the save session feature
+const { DynamoDbPersistenceAdapter } = require('ask-sdk-dynamodb-persistence-adapter');
+
 //Get the database table name. This will change later depending on how we proceed.
-const testFormTable = 'Redemption';
+//const testFormTable = 'Redemption';
 
 //Get a reference to DynamoDB and the DynamoDB DocumentClient. We only use the latter here.
-const db = new awsSDK.DynamoDB();
-const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.DocumentClient();
+//const db = new awsSDK.DynamoDB();
+//const docClient =  new awsSDK.DynamoDB.DocumentClient(); //new AWS.DynamoDB.DocumentClient();
 
-// Object that contains the slots and utterances for the new questionaire
-var slotDict;
+//Creates an instance of a Persistence Adapter
+const persistenceAdapter = new DynamoDbPersistenceAdapter({
+    //Specifies table name in DB
+    tableName: 'KHConversationStates',
+    createTable: true //creates table above if it does not exist in the database
+    // still not sure if the two lines above this comment are the right approach to things
+});
+
 
 /**Important. This attributes object (objects in JS are like dictionaries in Python)
  * is to store the state of an survey (aka intent) so that we may reference it when
@@ -29,9 +38,6 @@ var previousElicitedSlot = {"field": null, "fieldValue": null}
 var currentSlot;
 var previousSlot;
 var nextSlot;
-
-/**@Carlos, what is norm for? */
-var norm;
 
 /**flowChanged is a boolean that is false if the flow of the conversation is completely linear, and
  * false if we skip over a question (next).
@@ -62,24 +68,48 @@ var elaborations = {"history":"Glaucoma is a group of eye conditions that damage
 
 var reviewSurvey;
 
+//intent names mapped to survey names
+var surveyNames = {
+  "TestSurvey": "Dr. Brown Appointment Survey",
+  "KenSurvey": "Dr. Ken Survey"
+}
+
 /** This function is to initialize the fields of a survey inside the database
  * (This will change later depending on how we proceed.) to "N/A" for any
  * survey that we start.
  */
-function initializeDBField(){
-  console.log("IN INITIALIZE FIELDS");
-  let params = {
-    TableName: testFormTable,
-    Item: {
-      userID: "1",
-      participantName: "N/A",
-      participantAge: "N/A",
-      participantWeight: "N/A",
-      participantReason: "N/A"
-    },
-    ReturnValues: 'ALL_OLD'
-  };
-  docClient.put(params).promise();
+// function initializeDBField(){
+//   console.log("IN INITIALIZE FIELDS");
+//   let params = {
+//     TableName: testFormTable,
+//     Item: {
+//       userID: "1",
+//       participantName: "N/A",
+//       participantAge: "N/A",
+//       participantWeight: "N/A",
+//       participantReason: "N/A"
+//     },
+//     ReturnValues: 'ALL_OLD'
+//   };
+//   docClient.put(params).promise();
+//}
+
+function getSynonyms(valueName) {
+  const fs = require('fs');
+  const fileContents = fs.readFileSync('./model.json', 'utf8');
+  const data = JSON.parse(fileContents)
+  for(var i = 0 ; i < data.interactionModel.languageModel.types.length ; i++){
+    item = data.interactionModel.languageModel.types[i];
+    if(item.name == "SurveyNameType"){
+      for(var j = 0 ; j < item.values.length ; j++){
+        typeValue = item.values[j];
+        if(typeValue.name.value == valueName){
+          return typeValue.name.synonyms[0];
+        }
+      }
+    }
+  }
+  return "error";
 }
 
 /**This function loads the interaction model from model.json. It is used to populate slotOrder. */
@@ -90,7 +120,6 @@ function loadModel(surveyName){
 
   try {
     const data = JSON.parse(fileContents)
-    //Will need to make sure we select the current survey (intent) rather than saying [5]
     data.interactionModel.languageModel.intents.forEach((item) => {
       if(item.name == surveyName){
         item.slots.forEach((slot) => {
@@ -98,10 +127,6 @@ function loadModel(surveyName){
         });
       }
     }); 
-    //slots = data.interactionModel.languageModel.intents[5].slots
-    // slots.forEach((item) => {
-    //   slotOrder.push(item.name);
-    // })
   } catch(err) {
     console.error(err);
   }
@@ -124,6 +149,21 @@ function findPreviouslyElicitedSlot(handlerInput){
   });
 }
 
+function saveSurveyState(handlerInput){
+  return new Promise((resolve, reject) => {
+    handlerInput.attributesManager.getPersistentAttributes()
+      .then((saveState) => {
+        saveState[handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
+        handlerInput.attributesManager.setPersistentAttributes(saveState);
+        handlerInput.attributesManager.savePersistentAttributes();
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+});
+}
+
 /**This function does not work yet. It will potentially take care of
  * updating all the fields in the database as the conversation flows.
  * The problem encountered is actually keeping track of which field has been
@@ -133,32 +173,32 @@ function findPreviouslyElicitedSlot(handlerInput){
  * This function takes in the field that is being updated (string) and the
  * field value (type depends).
  */
-function updateFields(field, fieldValue){
+// function updateFields(field, fieldValue){
 
-  camelCaseField = field.charAt(0).toUpperCase() + field.slice(1);
-  dynamicUpdateExpression = "set participant" + camelCaseField + " = :update" + camelCaseField;
-  dynamicExpressionAttributeValue = ":update" + camelCaseField;
+//   camelCaseField = field.charAt(0).toUpperCase() + field.slice(1);
+//   dynamicUpdateExpression = "set participant" + camelCaseField + " = :update" + camelCaseField;
+//   dynamicExpressionAttributeValue = ":update" + camelCaseField;
 
-  let params = {
-    TableName:testFormTable,
-    Key:{
-        "userID":"1"
-    },
-    UpdateExpression: dynamicUpdateExpression,
-    ExpressionAttributeValues:{
-        [dynamicExpressionAttributeValue]:fieldValue
-    },
-    ReturnValues:"UPDATED_NEW"
-};
-  docClient.update(params,(err, data) =>{
-    if(err){
-      console.log(err);
-    }
-    else{
-      console.log(data);
-    }
-  }).promise();
-}
+//   let params = {
+//     TableName:testFormTable,
+//     Key:{
+//         "userID":"1" // todo: have users get a generated user id
+//     },
+//     UpdateExpression: dynamicUpdateExpression,
+//     ExpressionAttributeValues:{
+//         [dynamicExpressionAttributeValue]:fieldValue
+//     },
+//     ReturnValues:"UPDATED_NEW"
+// };
+//   docClient.update(params,(err, data) =>{
+//     if(err){
+//       console.log(err);
+//     }
+//     else{
+//       console.log(data);
+//     }
+//   }).promise();
+// }
 
 /* INTENT HANDLERS */
 
@@ -180,6 +220,9 @@ function updateFields(field, fieldValue){
   * For now, the only survey available is "Dr Brown Appointment Survey".
   * This handler also resets all of the necessary global variables.
   */
+
+
+// TODO: When skill is launched again, we should tell user where they left off
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
@@ -197,15 +240,16 @@ const LaunchRequestHandler = {
                 "spray":"Are you using any nasal spray, or systemic steroid medication?",
                 "trauma":"Any previous trauma to or near the eye since infancy?",
                 "thinner":"Are you on blood thinner?",
-                "diabetes":"Do you have diabetes?"};
+                "diabetes":"Do you have diabetes?",
+                "name": "What is your name?",
+                "age": "What is your age?",
+                "weight": "What is your weight in pounds?",
+                "reason": "What is your reason for your visit with Dr. Browne?"
+              };
     reviewSurvey = null;
-    //const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    //const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-
-    //handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-
-    const speakOutput = "Hello, User. which survey do you want to fill out?";
-    const repromptSpeech = "Sorry, which survey do you want to fill out?";
+    const speakOutput = "Hello, user. Do you want to fill out a new form or continue on an old survey?";
+    const repromptSpeech = "Sorry, I didn't quite get that. Would you like to begin a new form or continue on an old survey?";
+    
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
@@ -252,17 +296,19 @@ const LaunchRequestHandler = {
 const BeginFormHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === "IntentRequest"
-      && (handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
+    && (handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
       || handlerInput.requestEnvelope.request.intent.name === "KenSurvey")
   },
   handle(handlerInput) {
     console.log("FLOW IN BEGIN: " + flowChanged);
 
+    saveSurveyState(handlerInput);
+
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
       //Load interaction model from model.json. Approach can be changed later
       loadModel(handlerInput.requestEnvelope.request.intent.name)
       //Initialize all necessary database fields
-      initializeDBField();
+      //initializeDBField();
       //Since the dialog is barely starting, we know what the current and next slots are.
       currentSlot = slotOrder[0];
       nextSlot = slotOrder[1];
@@ -275,7 +321,7 @@ const BeginFormHandler = {
         if(attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
           findPreviouslyElicitedSlot(handlerInput);
           if(previousElicitedSlot["field"]){
-            updateFields(previousElicitedSlot["field"], previousElicitedSlot["fieldValue"])
+            //updateFields(previousElicitedSlot["field"], previousElicitedSlot["fieldValue"])
           }
         }
         attributes["temp_" + handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
@@ -316,12 +362,7 @@ const BeginFormHandler = {
       console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + currentSlot);
       console.log("IN_PROGRESS DIALOG, NEXT SLOT: " + nextSlot);
     }  
-    // set a boolean that checks that the normal flow is no longer being followed
-      // 
-      // if the original flow is not being followed (use the elicit slot directrive to prompt for the new (current) slots)
-          // (i.e DO NOT RETURN TO THE ORIGINAL FLOW)
 
-    //Check if the boolean mentioned above is false. That means we can continue with the normal flow
     console.log("FLOW: " + flowChanged);
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && flowChanged){
         return handlerInput.responseBuilder
@@ -331,9 +372,9 @@ const BeginFormHandler = {
        .getResponse()
     }
     else if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && !flowChanged){
-        return handlerInput.responseBuilder
-       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
-       .getResponse()
+      return handlerInput.responseBuilder
+      .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
+      .getResponse();
     }
     else {
         //delete attributes['temp_' + handlerInput.requestEnvelope.request.intent.name];
@@ -345,6 +386,7 @@ const BeginFormHandler = {
     }
   }
 };
+
 
 /**The Previous Handler will first check if the user's request is an intent request, and if that intent request
  * corresponds to the PreviousSlot Intent. If it does:
@@ -386,13 +428,13 @@ const PreviousHandler = {
       .speak(slotDict[currentSlot])
       .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
       .addElicitSlotDirective(currentSlot,
-            attributes[Object.keys(attributes)[0]])// at the moment we only have 1 attribute object 
+            attributes[Object.keys(attributes)[0]])
       .getResponse();
       }
       else{
         return handlerInput.responseBuilder
         .speak("There are no previous questions. Do you want to continue?")
-        .reprompt("Hi User. There are no previous questions. Do you want to continue?")
+        .reprompt("Hi user. There are no previous questions. Do you want to continue?")
         .getResponse();
         //Finish Later
       }
@@ -438,10 +480,8 @@ const NextHandler = {
         console.log("NEXT INTENT, NEXT SLOT: " + nextSlot);
 
         return handlerInput.responseBuilder
-      .speak(slotDict[currentSlot])
-      .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
-      //.speak("What do you want the " + currentSlot + " to be?")
-      //.reprompt("Sorry, what do you want the " + currentSlot + " to be?")
+        .speak(slotDict[currentSlot])       
+        .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
       .addElicitSlotDirective(currentSlot,
             attributes[Object.keys(attributes)[0]])
       .getResponse();
@@ -449,8 +489,7 @@ const NextHandler = {
       else{
         return handlerInput.responseBuilder
         .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-
+        .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
         //Finish Later
       }
@@ -497,10 +536,9 @@ const FixFieldHandler = {
         console.log("JUMP FIXING, PREVIOUS SLOT: " + previousSlot);
         console.log("JUMP FIXING, CURRENT SLOT: " + currentSlot);
         console.log("JUMP FIXING, NEXT SLOT: " + nextSlot);
-        const speakOutput = "What do you want the " + handlerInput.requestEnvelope.request.intent.slots.fieldToBeFixed.value + " to be?"
-      return handlerInput.responseBuilder
-         .speak(speakOutput)
-         .reprompt("Sorry, " + speakOutput)
+        return handlerInput.responseBuilder
+        .speak(slotDict[currentSlot])       
+        .reprompt("Sorry I didn't get that, " + slotDict[currentSlot])
          /*IMPORTANT!!! If user gives an invalid field to be fixed, the Alexa will still accept it for some reason
          and place it in (I'm assuming) the first empty slot. I thought addElicitSlotDirective would handle this easily,
          but I guess it doesn't.
@@ -512,7 +550,7 @@ const FixFieldHandler = {
     }
   }
   
-  // for next & previous handlers pass the next slot or previous slot variables tothe elicit slot directive
+  // for next & previous handlers pass the next slot or previous slot variables to the elicit slot directive
   // be sure to update the varibles as well, and set the flowChanged boolean to false 
 
  //Handles "I don't know" responses from user.
@@ -560,9 +598,62 @@ const FixFieldHandler = {
       return handlerInput.responseBuilder
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
-
+      }
     }
-  };
+
+// To do: Create/continue working on continue handler  
+const ContinueHandler = {
+
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'ContinueIntent';
+
+  },
+  async handle(handlerInput) {
+    //return new Promise()
+    const saveState = await handlerInput.attributesManager.getPersistentAttributes();
+    
+    if(!handlerInput.requestEnvelope.request.intent.slots.surveyName.value){
+      surveys = [];
+      Object.keys(surveyNames).forEach((survey) => {
+        if(Object.keys(saveState).includes(survey)){
+
+          surveys.push(surveyNames[survey]);
+        }
+      });
+      const speakOutput = "What survey would you like to continue? You can say something like: " + surveys.join(", ");
+      return handlerInput.responseBuilder
+      .speak(speakOutput)
+      .reprompt("Sorry, " + speakOutput)
+      .addElicitSlotDirective("surveyName")
+      .getResponse();
+    }
+    else{
+      console.log("IN SURVEY HANDLE FUNCTION ELSE STATEMENT");
+      console.log(saveState);
+      synonym = getSynonyms(handlerInput.requestEnvelope.request.intent.slots.surveyName.resolutions.resolutionsPerAuthority[0].values[0].value.name);
+      console.log(synonym);
+      return handlerInput.responseBuilder
+      .addDelegateDirective(saveState[synonym])
+      .getResponse();
+    }
+  }
+}
+
+const NewSurveyHandler = { 
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'NewSurveyIntent';
+
+    },
+
+  handle(handlerInput){
+    const speakOutput = "What survey would you like to begin?";
+
+  }
+
+
+}
 
   const ReviewHandler = {
     canHandle(handlerInput) {
@@ -692,8 +783,11 @@ exports.handler = skillBuilder
     HelpHandler,
     RepeatHandler,
     ExitHandler,
-    SessionEndedRequestHandler
+    SessionEndedRequestHandler,
+    ContinueHandler,
+    NewSurveyHandler 
   )
   //.addRequestInterceptors(LocalizationInterceptor)
+  .withPersistenceAdapter(persistenceAdapter) // tells Skill Builder to use persistence adapter
   .addErrorHandlers(ErrorHandler)
   .lambda();
