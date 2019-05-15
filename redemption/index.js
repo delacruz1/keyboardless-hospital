@@ -2,7 +2,7 @@
 //We have these dependencies in our node_modules.
 const Alexa = require('ask-sdk-core');
 const awsSDK = require('aws-sdk');
-
+console.log("YUHHH");
 // Reference to the DynamoDB Persistence Adapter, which we need for the save session feature
 const { DynamoDbPersistenceAdapter } = require('ask-sdk-dynamodb-persistence-adapter');
 
@@ -323,6 +323,8 @@ const ContinueHandler = {
       survey.loadSurveyState(saveState, synonym);
       if(survey.flowChanged){
         return handlerInput.responseBuilder
+        .speak(survey.slotDict[survey.currentSlot])
+        .reprompt("Sorry, " + survey.slotDict[survey.currentSlot])
         .addElicitSlotDirective(survey.currentSlot, saveState[synonym])
         .getResponse();
       }
