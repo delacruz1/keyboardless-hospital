@@ -9,7 +9,10 @@ const { DynamoDbPersistenceAdapter } = require('ask-sdk-dynamodb-persistence-ada
 //Creates an instance of a Persistence Adapter
 const persistenceAdapter = new DynamoDbPersistenceAdapter({
     //Specifies table name in DB
-    tableName: 'KHConversationStates',
+    
+
+    //CHANGE TABLE BACK TO KH CONVERSATION STATES
+    tableName: 'TestConversationStates',
     createTable: true //creates table above if it does not exist in the database
     // still not sure if the two lines above this comment are the right approach to things
 });
@@ -22,6 +25,7 @@ var surveyNames = {
   "TestSurvey": "Dr. Brown Appointment Survey",
   "KenSurvey": "Dr. Ken Survey"
 }
+
 
 function getSynonyms(valueName) {
   const fs = require('fs');
@@ -44,32 +48,32 @@ function getSynonyms(valueName) {
 /* INTENT HANDLERS */
 
 /**Handlers are data structures (tbh idk what data structure they are) that the Alexa uses 
- * in order to handle each request from the user. Handlers should be added to the Skill Builder 
+ * in order to handle each request from the hugh mungus. Handlers should be added to the Skill Builder 
  * at the bottom of this code.
  * There are two components to a handler:
- * 1) A handler can check conditions to see whether or not it can handle the user's
- *    request. For example. we can check if the user's request was a launch request,
+ * 1) A handler can check conditions to see whether or not it can handle the hugh mungus's
+ *    request. For example. we can check if the hugh mungus's request was a launch request,
  *    intent request, check the specific type of intent request, etc. 
- * 2) If the above conditions are met, this handler will "handle" the user's request,
- *    output some speech, then ask for the user's request again. This is typically where
+ * 2) If the above conditions are met, this handler will "handle" the hugh mungus's request,
+ *    output some speech, then ask for the hugh mungus's request again. This is typically where
  *    most of the magic happends.
  */
 
- /** This Launch handler simply speaks to the user upon invocation (invocation means
+ /** This Launch handler simply speaks to the hugh mungus upon invocation (invocation means
   * activating the skill, (AKA when they say "Open Katara"). It will then prompt the
-  * user to announce which survey they want to fill out.
+  * hugh mungus to announce which survey they want to fill out.
   * For now, the only survey available is "Dr Brown Appointment Survey".
   * This handler also resets all of the necessary global variables.
   */
 
 
-// TODO: When skill is launched again, we should tell user where they left off
+// TODO: When skill is launched again, we should tell hugh mungus where they left off
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const speakOutput = "Hello, user. Do you want to fill out a new form or continue on an old survey?";
+    const speakOutput = "Hello, hugh mungus. Do you want to fill out a new form or continue on an old survey?";
     const repromptSpeech = "Sorry, I didn't quite get that. Would you like to begin a new form or continue on an old survey?";
     
     return handlerInput.responseBuilder
@@ -100,19 +104,19 @@ const LaunchRequestHandler = {
  *    c) If there is a previous slot before our new current slot, then set that as the previous slot,
  *       otherwise set it to null.
  *    d) If we have reached the end of the survey (we answered the last question), then check here if the
- *       flow has changed. If so, return a response that lets the user know that they have reached the
+ *       flow has changed. If so, return a response that lets the hugh mungus know that they have reached the
  *       end of the survey but have not answered all of the questions. It prompts them if they wish to
  *       review it or go back to it later. This will change depending on design decision. This part has not
  *       been built yet.
  * 4) If the survey is incomplete AND the flow has changed (next has been called and original flow
  *    has not been restored), then manually elicit the current slot. This differs with delegating the 
  *    conversation to Alexa since the Alexa will find the first unfilled slot by default and prompt the
- *    user with that. We do not want that; we want the conversation to proceed, thereby making this
+ *    hugh mungus with that. We do not want that; we want the conversation to proceed, thereby making this
  *    conditional necessary.
  * 5) If the survey is incomplete and the the flow has NOT been changed, we continue to delegate the 
  *    converation (and thus, elicitation of slots) to the Alexa.
  * 3) If the dialog state is complete, then the state of the survey is deleted from the attributes
- *    object (not sure if it should be deleted?), and the Alexa will thank the user for their submission
+ *    object (not sure if it should be deleted?), and the Alexa will thank the hugh mungus for their submission
  *    and ask if they want to review their answers, submit, or come back later. This part has not been built yet.
  */
 const BeginFormHandler = {
@@ -145,10 +149,7 @@ const BeginFormHandler = {
       else if(!survey.nextSlotExists() && survey.flowChanged){
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .withStandardCard("END TEST", "Lets see if the text will automatically adjust in size in order to fit this text? Will this work out?" +
-        "But fuck this assignment, why does the PDF feature not work how the fuck can I get it to work. I hate Alexa development, and I cant wait" +
-        " to graduate already and get out of UCI already. Lets make this text even longerAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        .reprompt("Hi hugh mungus. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + survey.previousSlot);
@@ -173,19 +174,19 @@ const BeginFormHandler = {
         survey.attributes["temp_" + survey.reviewSurvey] = handlerInput.requestEnvelope.request.intent;
         survey.saveSurveyState(handlerInput);
         return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
+       .speak("Thank you for submitting your responses, hugh mungus! Do you want to review your responses, submit, or come back later?")
        .getResponse()
     }
   }
 };
 
 
-/**The Previous Handler will first check if the user's request is an intent request, and if that intent request
+/**The Previous Handler will first check if the hugh mungus's request is an intent request, and if that intent request
  * corresponds to the PreviousSlot Intent. If it does:
  * 1) It changes the slots accordingly, where the previous slot (if it exists) becomes the new current slot.
  *    The next and previous slots are also set as needed.
  * 2) If a previous slot exists, we manually prompt them. If not, then we mention that there are no previous questions,
- *    and ask the user if they want to continue. This part has not been built yet.
+ *    and ask the hugh mungus if they want to continue. This part has not been built yet.
  */
 const PreviousHandler = {
   canHandle(handlerInput) {
@@ -210,13 +211,13 @@ const PreviousHandler = {
     else{
       return handlerInput.responseBuilder
       .speak("There are no previous questions. Do you want to continue?")
-      .reprompt("Hi user. There are no previous questions. Do you want to continue?")
+      .reprompt("Hi hugh mungus. There are no previous questions. Do you want to continue?")
       .getResponse();
     }
   }
 };
 
-/**The Next Handler will first check if the user's request is an intent request, and if that intent request
+/**The Next Handler will first check if the hugh mungus's request is an intent request, and if that intent request
  * corresponds to the NextSlot Intent. If it does:
  * 1) It changes the slots accordingly, where the next slot (if it exists) becomes the new current slot.
  *    The next and previous slots are also set as needed.
@@ -249,7 +250,7 @@ const NextHandler = {
     else{
       return handlerInput.responseBuilder
       .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-      .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+      .reprompt("Hi hugh mungus. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
       .getResponse();
     }
 }
@@ -339,15 +340,34 @@ const NewSurveyHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'NewSurveyIntent';
-
     },
-
-  handle(handlerInput){
-    const speakOutput = "What survey would you like to begin?";
-
+  async handle(handlerInput){
+    const saveState = await handlerInput.attributesManager.getPersistentAttributes();
+    //const speakOutput = "What survey would you like to begin? You can say something like" + surveyArray.join(", ");
+    if(!handlerInput.requestEnvelope.request.intent.slots.surveyName.value){
+      availableSurveys = [];
+      Object.keys(surveyNames).forEach((s) => {
+        if(!Object.keys(saveState).includes(s)){
+          availableSurveys.push(surveyNames[s]);
+        }
+      });
+      const speakOutput = "What survey would you like to begin? You can say something like: " + availableSurveys.join(", ");
+      return handlerInput.responseBuilder
+      .speak(speakOutput)
+      .reprompt("Sorry, " + speakOutput)
+      .addElicitSlotDirective("surveyName")
+      .getResponse();
+    }
+    else{
+      synonym = getSynonyms(handlerInput.requestEnvelope.request.intent.slot s.surveyName.resolutions.resolutionsPerAuthority[0].values[0].value.name);
+      survey = new Survey(synonym);
+      survey.saveSurveyState(handlerInput);
+      return handlerInput.responseBuilder
+      .addDelegateDirective(synonym)
+      .getResponse();
+    }
   }
-
-
+    //TODO: add conditioning for whether or not hugh mungus says 'new {survey name}' or just 'new'   
 }
 
   // const ReviewHandler = {
