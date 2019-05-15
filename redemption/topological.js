@@ -10,6 +10,7 @@ module.exports = class Survey {
         this.attributes = {};
         this.flowChanged = false;
         this.reviewSurvey = null;
+        this.surveyName = surveyName;
         this. elaborations = {"history":"Glaucoma is a group of eye conditions that damage the optic nerve, the health of which is vital for good vision. This damage is often caused by an abnormally high pressure in your eye and is one of the leading causes of blindness. Do you have any knowledge of any family member in the past that has experienced glaucoma?",
                                 "prior": "Have you had any surgecil procedures or laser applied to improve any condition of your eyes?",
                                 "pressure":"Eye pressure is measured in millimeters of mercury. Normal eye pressure ranges from 12 to 22 millimeters of mercury.",
@@ -83,10 +84,12 @@ module.exports = class Survey {
     saveSurveyState(handlerInput){
         return new Promise((resolve, reject) => {
             handlerInput.attributesManager.getPersistentAttributes()
-            .then((saveState) => {
-                saveState[handlerInput.requestEnvelope.request.intent.name] = handlerInput.requestEnvelope.request.intent;
-                saveState[handlerInput.requestEnvelope.request.intent.name]["currentSlot"] = this.currentSlot;
-                saveState[handlerInput.requestEnvelope.request.intent.name]["flow"] = this.flowChanged;
+            .then((saveState) => { // pick up here, you did need to check that dictionary
+                if(Object.values(this.surveyIntent).includes(handlerInput.requestEnvelope.request.intent.name)){
+                    saveState[this.surveyName] = handlerInput.requestEnvelope.request.intent;
+                }
+                saveState[this.surveyName]["currentSlot"] = this.currentSlot;
+                saveState[this.surveyName]["flow"] = this.flowChanged;
                 handlerInput.attributesManager.setPersistentAttributes(saveState);
                 handlerInput.attributesManager.savePersistentAttributes();
             })
@@ -95,7 +98,7 @@ module.exports = class Survey {
                 reject(error);
             });
         });
-    }
+    } // try to split the function so that you can call the secondary function only at next & prev...
 
     loadSurveyState(saveState, surveyName){
       this.questions = this.loadModel(surveyName);
@@ -130,6 +133,8 @@ module.exports = class Survey {
         else{
           this.previousSlot=  null;
         }
+        console.log("NEW CURRENT SLOT IS: " + this.currentSlot + "AT INDEX: "+ this.currentIndex);
+        console.log("NEW NEXT SLOT IS: " + this.nextSlot);
     }
 
     retractSlots(){
@@ -145,7 +150,7 @@ module.exports = class Survey {
           this.previousSlot = this.questions[this.currentIndex - 1];
         }
         else{
-          this.previousSlot=  null;
+          this.previousSlot = null;
         }
     }
 
