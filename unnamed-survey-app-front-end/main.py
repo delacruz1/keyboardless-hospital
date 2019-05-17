@@ -30,30 +30,39 @@ def root():
 def mySurveysPage():
     dr = "D1"
     #my_dummy_surveys = ["hello",]
-    so = table_get_all("Surveys", key=lambda x: {"DoctorID":dr} in x["DoctorAccess"])
-    survey_objs = []
-    for s in so:
-        url = s["SurveyName"].replace(" ", "%20")
-        survey_objs.append((s,url))
+    print("#"*50)
+    alexa_surveys = table_get_all("KHConversationStates")#, key=lambda x: {"DoctorID":dr} in x["DoctorAccess"]
+    survey_structure = []
+    survey_ids = []
+    
+    print("!"*50)
+    for instance in alexa_surveys:
+        print(instance)
+        for k, v in instance['attributes'].items():
+            survey_structure.append(v)
+            survey_ids.append((instance['id'], k))
+    survey_objs = [(survey_ids[i], survey_structure[i]) for i in range(len(survey_structure))]
+                    
+    print("&"*50)            
+    print(survey_objs)
+        #url = s["SurveyName"].replace(" ", "%20")
+        #survey_objs.append((s,url))
     return render_template('my_surveys.html', mySurveys=survey_objs)
 
 @app.route('/view_survey.html')
 def viewSurveyPage():
-    survey = request.args.get('survey')
-    view = request.args.get('view') if request.args.get('view') else "questions"
-    key    = survey.replace("%20", " ")
-    survey_obj = table_query("Surveys", {"SurveyName":key})
-    url = request.url[:request.url.find("&") if "&" in request.url else len(request.url)]
-    responses = [
-        {"Name":"Bob Smith","Date":"04/25/1995","Q1":"Male","Q2":"None"},
-        {"Name":"Jen Jones","Date":"03/15/1952","Q1":"Female","Q2":"Father with heart disease"},
-        {"Name":"Lucy Brown","Date":"08/14/2001","Q1":"Female","Q2":"None"},
-        {"Name":"Carol Brown","Date":"05/03/1977","Q1":"Non-Binary","Q2":"Mat. grandmother and mather died of heart disease"},
-        {"Name":"Dick Nixon","Date":"11/27/1984","Q1":"Male","Q2":"Had 5 previous heart attacks"}
-        ]
-    responses = table_get_all("Responses", key=lambda x: x["SurveyName"] == key)
-    print(responses)
-    return render_template('view_survey.html', my_survey=survey_obj, view=view, this_url = url, responses=responses)
+    amazon_id, survey_key = eval(request.args.get('survey').replace("%20", " "))
+    all_surveys = []
+    instance = table_query("KHConversationStates", {'id':amazon_id})
+    for k, v in instance['attributes'].items():
+            all_surveys.append((k,v))
+    my_survey = None
+    for k,v in all_surveys:
+        if k == survey_key:
+            my_survey = v
+            break
+    print(my_survey)
+    return render_template('view_survey.html', my_survey=my_survey)
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
