@@ -53,10 +53,9 @@
 
 
     <h1>Viewing {{my_survey["name"]}}</h1>
-	
-	<h3>{{view}}</h3>
 	<table style="table-layout:fixed;width:100%;border:1px solid black;">
-		{% for question in my_survey["slots"].values() %}
+		{% for q in my_survey["questionOrder"] %}
+		{% set question = my_survey["slots"][q] %}
 		<tr>
 			<th>{{question["questionText"]}}</th>
 		</tr>
