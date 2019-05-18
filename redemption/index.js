@@ -75,9 +75,6 @@ const LaunchRequestHandler = {
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
-      .withStandardCard("BEGIN TEST", "Lets see if the text will automatically adjust in size in order to fit this text? Will this work out?" +
-      "But fuck this assignment, why does the PDF feature not work how the fuck can I get it to work. I hate Alexa development, and I cant wait" +
-      " to graduate already and get out of UCI already. Lets make this text even longerAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
       .getResponse();
   },
 };
@@ -146,9 +143,6 @@ const BeginFormHandler = {
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .withStandardCard("END TEST", "Lets see if the text will automatically adjust in size in order to fit this text? Will this work out?" +
-        "But fuck this assignment, why does the PDF feature not work how the fuck can I get it to work. I hate Alexa development, and I cant wait" +
-        " to graduate already and get out of UCI already. Lets make this text even longerAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + survey.previousSlot);

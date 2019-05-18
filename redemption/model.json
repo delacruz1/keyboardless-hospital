@@ -193,14 +193,40 @@
                     "slots": [
                         {
                             "name": "surveyName",
-                            "type": "SurveyNameType",
-                            "samples": [
-                                "{surveyName}"
-                            ]
+                            "type": "SurveyNameType"
                         }
                     ],
                     "samples": [
                         "Continue"
+                    ]
+                },
+                {
+                    "name": "ReviewIntent",
+                    "slots": [
+                        {
+                            "name": "survey",
+                            "type": "SurveyNameType"
+                        }
+                    ],
+                    "samples": [
+                        "Review {survey}",
+                        "Can i review my answers",
+                        "Review"
+                    ]
+                },
+                {
+                    "name": "Test",
+                    "slots": [
+                        {
+                            "name": "pressure",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{pressure}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "sesame"
                     ]
                 }
             ],
@@ -449,14 +475,56 @@
                             "name": "surveyName",
                             "type": "SurveyNameType",
                             "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.1529010474015.1299688959097"
-                            },
+                            "elicitationRequired": false,
+                            "prompts": {},
                             "validations": [
                                 {
                                     "type": "hasEntityResolutionMatch",
                                     "prompt": "Slot.Validation.170209144318.202363380212.824328470864"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "ReviewIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "survey",
+                            "type": "SurveyNameType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {},
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.250443157652.1336423623412.1460750626499"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Test",
+                    "delegationStrategy": "ALWAYS",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "pressure",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.824270961323.707120315994"
+                            },
+                            "validations": [
+                                {
+                                    "type": "isGreaterThan",
+                                    "prompt": "Slot.Validation.3133151224.498361497553.272853230867",
+                                    "value": "50"
                                 }
                             ]
                         }
@@ -697,6 +765,33 @@
                     {
                         "type": "PlainText",
                         "value": "I don't understand. Please say the name of an available survey."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.250443157652.1336423623412.1460750626499",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Sorry, please say one of the surveys available to you."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.3133151224.498361497553.272853230867",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Sorry, that's not an acceptable value. Please say something greater than fifty"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.824270961323.707120315994",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is your eye pressure?"
                     }
                 ]
             }

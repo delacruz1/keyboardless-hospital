@@ -88,6 +88,11 @@ module.exports = class Survey {
                 if(this.surveyName == handlerInput.requestEnvelope.request.intent.name){
                   console.log("SURVEY NAME SAVED: " + this.surveyName);
                     saveState[this.surveyName] = handlerInput.requestEnvelope.request.intent;
+                    if(handlerInput.requestEnvelope.request.dialogState === "STARTED"){
+                      Object.keys(saveState[this.surveyName].slots).forEach((slot) => {
+                        saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot];
+                      });
+                    }
                 }
                 saveState[this.surveyName]["currentSlot"] = this.currentSlot;
                 saveState[this.surveyName]["flow"] = this.flowChanged;
