@@ -198,7 +198,7 @@ const PreviousHandler = {
       .speak(survey.slotDict[survey.currentSlot])
       .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot])
       .addElicitSlotDirective(survey.currentSlot,
-            survey.attributes[Object.keys(survey.attributes)[0]])
+            survey.attributes["temp_" + survey.surveyName])
       .getResponse();
     }
     else{
@@ -237,7 +237,7 @@ const NextHandler = {
       .speak(survey.slotDict[survey.currentSlot])       
       .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot])
       .addElicitSlotDirective(survey.currentSlot,
-          survey.attributes[Object.keys(survey.attributes)[0]])
+          survey.attributes["temp_" + survey.surveyName])
       .getResponse();
     }
     else{
@@ -263,14 +263,14 @@ const IDKHandler = {
           survey.advanceSlots();
           return handlerInput.responseBuilder
           .speak("Okay, I'll take you to the next question. " + survey.slotDict[survey.currentSlot])
-          .addElicitSlotDirective(survey.currentSlot, survey.attributes[Object.keys(survey.attributes)[0]])
+          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
         // Elaborate
         if (handlerInput.requestEnvelope.request.intent.slots.option.value === "elaborate"){
           return handlerInput.responseBuilder
           .speak(survey.elaborations[survey.currentSlot])
-          .addElicitSlotDirective(survey.currentSlot, survey.attributes[Object.keys(survey.attributes)[0]])
+          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
         //  * 1st phase design:  store locally with new objects
