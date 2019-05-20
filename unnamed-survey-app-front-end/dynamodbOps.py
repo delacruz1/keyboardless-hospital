@@ -17,7 +17,9 @@ class DecimalEncoder(json.JSONEncoder):
 
 
 def table_query(table, keydict):
-    dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
+    dynamodb = boto3.resource("dynamodb", region_name='us-east-1',
+         aws_access_key_id="AKIA5PXVZTCUE3P7SE5E",
+         aws_secret_access_key= "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")
     table = dynamodb.Table(table)
     item = None
     try:
@@ -33,7 +35,9 @@ def table_query(table, keydict):
     return item
 
 def table_get_all(table, key=None):
-    dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
+    dynamodb = boto3.resource("dynamodb", region_name='us-east-1',
+         aws_access_key_id="AKIA5PXVZTCUE3P7SE5E",
+         aws_secret_access_key= "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")
     table = dynamodb.Table(table)
     items = table.scan()["Items"]
     if key != None:

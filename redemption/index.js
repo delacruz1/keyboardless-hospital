@@ -20,7 +20,8 @@ var survey;
 //intent names mapped to survey names
 var surveyNames = {
   "TestSurvey": "Dr. Brown Appointment Survey",
-  "KenSurvey": "Dr. Ken Survey"
+  "KenSurvey": "Dr. Ken Survey",
+  "DemoSurvey": "Dr. Navarro Survey"
 }
 
 function getSynonyms(valueName) {
@@ -75,9 +76,6 @@ const LaunchRequestHandler = {
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptSpeech)
-      .withStandardCard("BEGIN TEST", "Lets see if the text will automatically adjust in size in order to fit this text? Will this work out?" +
-      "But fuck this assignment, why does the PDF feature not work how the fuck can I get it to work. I hate Alexa development, and I cant wait" +
-      " to graduate already and get out of UCI already. Lets make this text even longerAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
       .getResponse();
   },
 };
@@ -119,7 +117,8 @@ const BeginFormHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === "IntentRequest"
     && (handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
-      || handlerInput.requestEnvelope.request.intent.name === "KenSurvey")
+      || handlerInput.requestEnvelope.request.intent.name === "KenSurvey"
+      || handlerInput.requestEnvelope.request.intent.name === "DemoSurvey")
   },
   handle(handlerInput) {
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
@@ -146,9 +145,6 @@ const BeginFormHandler = {
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .withStandardCard("END TEST", "Lets see if the text will automatically adjust in size in order to fit this text? Will this work out?" +
-        "But fuck this assignment, why does the PDF feature not work how the fuck can I get it to work. I hate Alexa development, and I cant wait" +
-        " to graduate already and get out of UCI already. Lets make this text even longerAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + survey.previousSlot);
@@ -204,7 +200,7 @@ const PreviousHandler = {
       .speak(survey.slotDict[survey.currentSlot])
       .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot])
       .addElicitSlotDirective(survey.currentSlot,
-            survey.attributes[Object.keys(survey.attributes)[0]])
+            survey.attributes["temp_" + survey.surveyName])
       .getResponse();
     }
     else{
@@ -243,7 +239,7 @@ const NextHandler = {
       .speak(survey.slotDict[survey.currentSlot])       
       .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot])
       .addElicitSlotDirective(survey.currentSlot,
-          survey.attributes[Object.keys(survey.attributes)[0]])
+          survey.attributes["temp_" + survey.surveyName])
       .getResponse();
     }
     else{
@@ -269,14 +265,14 @@ const IDKHandler = {
           survey.advanceSlots();
           return handlerInput.responseBuilder
           .speak("Okay, I'll take you to the next question. " + survey.slotDict[survey.currentSlot])
-          .addElicitSlotDirective(survey.currentSlot, survey.attributes[Object.keys(survey.attributes)[0]])
+          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
         // Elaborate
         if (handlerInput.requestEnvelope.request.intent.slots.option.value === "elaborate"){
           return handlerInput.responseBuilder
           .speak(survey.elaborations[survey.currentSlot])
-          .addElicitSlotDirective(survey.currentSlot, survey.attributes[Object.keys(survey.attributes)[0]])
+          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
         //  * 1st phase design:  store locally with new objects
