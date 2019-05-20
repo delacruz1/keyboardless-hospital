@@ -20,7 +20,8 @@ var survey;
 //intent names mapped to survey names
 var surveyNames = {
   "TestSurvey": "Dr. Brown Appointment Survey",
-  "KenSurvey": "Dr. Ken Survey"
+  "KenSurvey": "Dr. Ken Survey",
+  "DemoSurvey": "Dr. Navarro Survey"
 }
 
 function getSynonyms(valueName) {
@@ -116,7 +117,8 @@ const BeginFormHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === "IntentRequest"
     && (handlerInput.requestEnvelope.request.intent.name === "TestSurvey"
-      || handlerInput.requestEnvelope.request.intent.name === "KenSurvey")
+      || handlerInput.requestEnvelope.request.intent.name === "KenSurvey"
+      || handlerInput.requestEnvelope.request.intent.name === "DemoSurvey")
   },
   handle(handlerInput) {
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){

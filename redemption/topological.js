@@ -9,6 +9,22 @@ module.exports = class Survey {
             },
             "forwardSlot": "pressure",
             "backSlot": "history"
+          },
+          "otherDemographic": {
+            "dependency": {
+              "parent": "demographic",
+              "requiredValue": "none of the above"
+            },
+            "forwardSlot": "medication",
+            "backSlot": "demographic"
+          },
+          "prescriptions": {
+            "dependency": {
+              "parent": "medication",
+              "requiredValue": "yes"
+            },
+            "forwardSlot": "history",
+            "backSlot": "medication"
           }
         }
         this.currentIndex = 0;
@@ -31,21 +47,7 @@ module.exports = class Survey {
                                 "thinner":"Blood thinners are medicines that prevent blood clots from forming. They also keep existing blood clots from getting larger. Are you on blood thinner?",
                                 "diabetes":"Diabetes is a disease in which your blood glucose, or blood sugar, levels are too high. Some symptoms include increased thirst, extreme hunger, and unexplained weight loss. Do you have diabetes?"};
 
-        this.slotDict = {"history":"Any family history of glaucoma?",
-                        "prior": "Any prior eye surgery or laser?",
-                        "pressure":"Do you know what your highest eye pressure ever was?",
-                        "effects":"Do you have any adverse side effects to any glaucoma eyedrops before?",
-                        "failure":"Do you have heart failure or asthma?",
-                        "typicalPressure":"What’s your typical eye pressure when you were followed by your previous doctor?",
-                        "spray":"Are you using any nasal spray, or systemic steroid medication?",
-                        "trauma":"Any previous trauma to or near the eye since infancy?",
-                        "thinner":"Are you on blood thinner?",
-                        "diabetes":"Do you have diabetes?",
-                        "name": "What is your name?",
-                        "age": "What is your age?",
-                        "weight": "What is your weight in pounds?",
-                        "reason": "What is your reason for your visit with Dr. Browne?"
-                    };
+        this.slotDict = this.loadSlotDict();
     }
 
     loadModel(surveyName){
@@ -105,6 +107,7 @@ module.exports = class Survey {
 
     loadSurveyState(saveState, surveyName){
       this.questions = this.loadModel(surveyName);
+      this.slotDict = this.loadSlotDict();
       this.currentSlot = saveState[surveyName].currentSlot;
       this.currentIndex = this.questions.indexOf(this.currentSlot);
       if(this.nextSlotExists()){
@@ -224,6 +227,31 @@ module.exports = class Survey {
       {
         "name": this.currentSlot,
         "confirmationStatus": "NONE"
+      }
+    }
+
+    loadSlotDict(){
+      var prompts = {};
+      var slotDict = {}
+      const fs = require('fs');
+      const fileContents = fs.readFileSync('./model.json', 'utf8');
+      try {
+        const data = JSON.parse(fileContents);
+        data.interactionModel.dialog.intents.forEach((item) => {
+          if(item.name == this.surveyName){
+            item.slots.forEach((slot) => {
+              prompts[slot.prompts.elicitation] = slot.name;
+            });
+          }
+        });
+        data.interactionModel.prompts.forEach((item) => {
+          if(Object.keys(prompts).includes(item.id)){
+            slotDict[prompts[item.id]] = item.variations[0].value;
+          }
+        });
+        return slotDict;
+      } catch(err) {
+        console.error(err);
       }
     }
 }
