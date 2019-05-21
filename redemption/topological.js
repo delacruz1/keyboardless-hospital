@@ -46,7 +46,11 @@ module.exports = class Survey {
                                 "trauma":"Do you recall any previous injury, trauma or detrimental condition to the eye or nearby regions?",
                                 "thinner":"Blood thinners are medicines that prevent blood clots from forming. They also keep existing blood clots from getting larger. Are you on blood thinner?",
                                 "diabetes":"Diabetes is a disease in which your blood glucose, or blood sugar, levels are too high. Some symptoms include increased thirst, extreme hunger, and unexplained weight loss. Do you have diabetes?"};
-
+        this.introductions = {
+                              "TestSurvey":"4",
+                              "KenSurvey":"This survey collects information regarding any optical damage or pre-conditions which could lead to glaucoma. The survey is 10 questions long.",
+                              "DemoSurvey":"13",
+                             }
         this.slotDict = this.loadSlotDict();
     }
 

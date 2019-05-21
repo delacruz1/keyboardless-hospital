@@ -2,7 +2,6 @@
 //We have these dependencies in our node_modules.
 const Alexa = require('ask-sdk-core');
 const awsSDK = require('aws-sdk');
-console.log("YUHHH");
 // Reference to the DynamoDB Persistence Adapter, which we need for the save session feature
 const { DynamoDbPersistenceAdapter } = require('ask-sdk-dynamodb-persistence-adapter');
 
@@ -70,7 +69,7 @@ const LaunchRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const speakOutput = "Hello, user. Do you want to fill out a new form or continue on an old survey?";
+    const speakOutput = "Hello, user. You may say the name of a survey you would like to begin, or say continue to pick up where you left off on a survey.";
     const repromptSpeech = "Sorry, I didn't quite get that. Would you like to begin a new form or continue on an old survey?";
     
     return handlerInput.responseBuilder
@@ -126,6 +125,10 @@ const BeginFormHandler = {
       survey.saveSurveyState(handlerInput);
       console.log("STARTED DIALOG, CURRENT SLOT: " + survey.currentSlot);
       console.log("STARTED DIALOG, NEXT SLOT: " + survey.nextSlot);
+      return handlerInput.responseBuilder
+      .speak(survey.introductions[handlerInput.requestEnvelope.request.intent.name])
+      .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
+      .getResponse();
     }
     
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED"){
@@ -151,7 +154,13 @@ const BeginFormHandler = {
       console.log("IN_PROGRESS DIALOG, CURRENT SLOT: " + survey.currentSlot);
       console.log("IN_PROGRESS DIALOG, NEXT SLOT: " + survey.nextSlot);
     }  
-
+    // added this, should give the introduction if the survey Was JUST STARTED
+    /*if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
+      return handlerInput.responseBuilder
+      .speak(survey.instructions[handlerInput.requestEnvelope.request.intent.name])
+      .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
+      .getResponse();
+    }*/
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && survey.flowChanged){
         return handlerInput.responseBuilder
         .speak(survey.slotDict[survey.currentSlot])       
