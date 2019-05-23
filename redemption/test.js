@@ -1,3 +1,3 @@
 var Survey = require("./topological.js");
-s = new Survey("TestSurvey");
+s = new Survey("DemoSurvey");
 console.log(s);
