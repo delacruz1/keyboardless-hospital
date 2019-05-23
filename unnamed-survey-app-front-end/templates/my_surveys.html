@@ -55,7 +55,7 @@
 		<div class="card text-center" style="width: 18rem;">
 		  <div class="card-body" style="float:none;margin:0 auto;">
 			  <h5 class="card-title">{{ my_survey[1]["name"] }}</h5>
-			  <p class="card-text"></p>
+			  <p class="card-text">{{my_survey[1]["surveyIntroduction"] if my_survey[1]["surveyIntroduction"] else "No Description"}}</p>
 			  <a href="view_survey.html?survey={{my_survey[0]}}" class="btn btn-primary">View Results</a>
 		</div>
       </div>
