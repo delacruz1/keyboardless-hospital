@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "thanos",
+            "invocationName": "tim",
             "intents": [
                 {
                     "name": "AMAZON.FallbackIntent",
@@ -129,7 +129,7 @@
                         },
                         {
                             "name": "pressure",
-                            "type": "AMAZON.NUMBER",
+                            "type": "YesNoType",
                             "samples": [
                                 "{pressure}"
                             ]
@@ -185,6 +185,8 @@
                         }
                     ],
                     "samples": [
+                        "Dr. Ken",
+                        "Dr. Ken Appointment Survey",
                         "Dr. Ken Survey"
                     ]
                 },
@@ -225,12 +227,18 @@
                     "values": [
                         {
                             "name": {
-                                "value": "skip"
+                                "value": "skip",
+                                "synonyms": [
+                                    "next question"
+                                ]
                             }
                         },
                         {
                             "name": {
-                                "value": "elaborate"
+                                "value": "elaborate",
+                                "synonyms": [
+                                    "explain more"
+                                ]
                             }
                         }
                     ]
@@ -363,16 +371,28 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.1524163073978"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.158956216954.1130197227929"
+                                }
+                            ]
                         },
                         {
                             "name": "pressure",
-                            "type": "AMAZON.NUMBER",
+                            "type": "YesNoType",
                             "confirmationRequired": false,
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.256250688696"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.1444761119236.1145266038975"
+                                }
+                            ]
                         },
                         {
                             "name": "effects",
@@ -381,7 +401,13 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.245626619642"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.1093609476249.105278222208"
+                                }
+                            ]
                         },
                         {
                             "name": "failure",
@@ -390,7 +416,13 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.1066772133150"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.975106356900.1386924508408"
+                                }
+                            ]
                         },
                         {
                             "name": "typicalPressure",
@@ -399,7 +431,14 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.721749395741"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "isGreaterThanOrEqualTo",
+                                    "prompt": "Slot.Validation.354784589904.788703432209.612928588387",
+                                    "value": "0"
+                                }
+                            ]
                         },
                         {
                             "name": "spray",
@@ -408,7 +447,13 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.94286273311"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.1511814186788.609094016989"
+                                }
+                            ]
                         },
                         {
                             "name": "trauma",
@@ -417,7 +462,13 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.133917579945"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.1424857049255.1364854226825"
+                                }
+                            ]
                         },
                         {
                             "name": "thinner",
@@ -426,7 +477,13 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.614107577301"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.348208165706.484250946774"
+                                }
+                            ]
                         },
                         {
                             "name": "diabetes",
@@ -435,7 +492,13 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.400310435379.432191645089"
-                            }
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.354784589904.79858396151.1287555307463"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -697,6 +760,87 @@
                     {
                         "type": "PlainText",
                         "value": "I don't understand. Please say the name of an available survey."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.158956216954.1130197227929",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.1444761119236.1145266038975",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.1093609476249.105278222208",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.975106356900.1386924508408",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.788703432209.612928588387",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "The eye pressure value in millimeters of mercury seem to be invalid. Please enter a valid eye pressure measurement that is greater than zero."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.1511814186788.609094016989",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.1424857049255.1364854226825",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.348208165706.484250946774",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.354784589904.79858396151.1287555307463",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please answer Yes or No, or say I don't know if you would like to skip or elaborate."
                     }
                 ]
             }

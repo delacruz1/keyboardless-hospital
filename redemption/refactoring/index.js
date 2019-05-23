@@ -58,7 +58,6 @@ function getSynonyms(valueName) {
  /** This Launch handler simply speaks to the user upon invocation (invocation means
   * activating the skill, (AKA when they say "Open Katara"). It will then prompt the
   * user to announce which survey they want to fill out.
-  * For now, the only survey available is "Dr Brown Appointment Survey".
   * This handler also resets all of the necessary global variables.
   */
 
@@ -135,6 +134,14 @@ const BeginFormHandler = {
         }
         survey.saveSurveyState(handlerInput);
         survey.saveAttributes(handlerInput);
+        // if (survey.attributes[survey.surveyName].slots[survey.previouslyElicitedSlot].resolutions
+        //       .resolutionsPerAuthority[0].status.code == "ER_SUCCESS_NO_MATCH"){
+        //         return handlerInput.responseBuilder
+        //           .speak("Speak "+survey.slotDict[survey.currentSlot])       
+        //           .reprompt("Please answer with a valid response")
+        //           .addElicitSlotDirective(survey.currentSlot)
+        //           .getResponse();
+        //       }
     }
 
     //Update the slot variables
