@@ -1,0 +1,1135 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "thanos",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "TestSurvey",
+                    "slots": [
+                        {
+                            "name": "name",
+                            "type": "AMAZON.Person",
+                            "samples": [
+                                "{name}"
+                            ]
+                        },
+                        {
+                            "name": "age",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "i don't know",
+                                "{age}"
+                            ]
+                        },
+                        {
+                            "name": "weight",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{weight} pounds",
+                                "{weight}"
+                            ]
+                        },
+                        {
+                            "name": "reason",
+                            "type": "AMAZON.SearchQuery",
+                            "samples": [
+                                "{reason}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "Dr. Brown Appointment Survey"
+                    ]
+                },
+                {
+                    "name": "TestFixField",
+                    "slots": [
+                        {
+                            "name": "fieldToBeFixedValue",
+                            "type": "AMAZON.SearchQuery",
+                            "samples": [
+                                "{fieldToBeFixedValue}"
+                            ]
+                        },
+                        {
+                            "name": "fieldToBeFixed",
+                            "type": "AMAZON.SearchQuery"
+                        }
+                    ],
+                    "samples": [
+                        "Go to {fieldToBeFixed}"
+                    ]
+                },
+                {
+                    "name": "NextSlot",
+                    "slots": [],
+                    "samples": [
+                        "Next"
+                    ]
+                },
+                {
+                    "name": "PreviousSlot",
+                    "slots": [],
+                    "samples": [
+                        "Previous"
+                    ]
+                },
+                {
+                    "name": "IDKIntent",
+                    "slots": [
+                        {
+                            "name": "option",
+                            "type": "IDKOptions",
+                            "samples": [
+                                "{option}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "I'm not sure",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "name": "KenSurvey",
+                    "slots": [
+                        {
+                            "name": "history",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{history}"
+                            ]
+                        },
+                        {
+                            "name": "prior",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{prior}"
+                            ]
+                        },
+                        {
+                            "name": "pressure",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{pressure}"
+                            ]
+                        },
+                        {
+                            "name": "effects",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{effects}"
+                            ]
+                        },
+                        {
+                            "name": "failure",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{failure}"
+                            ]
+                        },
+                        {
+                            "name": "typicalPressure",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{typicalPressure}"
+                            ]
+                        },
+                        {
+                            "name": "spray",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{spray}"
+                            ]
+                        },
+                        {
+                            "name": "trauma",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{trauma}"
+                            ]
+                        },
+                        {
+                            "name": "thinner",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{thinner}"
+                            ]
+                        },
+                        {
+                            "name": "diabetes",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{diabetes}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "Dr. Ken Survey"
+                    ]
+                },
+                {
+                    "name": "ContinueIntent",
+                    "slots": [
+                        {
+                            "name": "surveyName",
+                            "type": "SurveyNameType"
+                        }
+                    ],
+                    "samples": [
+                        "Continue"
+                    ]
+                },
+                {
+                    "name": "ReviewIntent",
+                    "slots": [
+                        {
+                            "name": "survey",
+                            "type": "SurveyNameType"
+                        }
+                    ],
+                    "samples": [
+                        "Review {survey}",
+                        "Can i review my answers",
+                        "Review"
+                    ]
+                },
+                {
+                    "name": "DemoSurvey",
+                    "slots": [
+                        {
+                            "name": "name",
+                            "type": "AMAZON.Person",
+                            "samples": [
+                                "{name}",
+                                "My name is {name}"
+                            ]
+                        },
+                        {
+                            "name": "dob",
+                            "type": "AMAZON.DATE",
+                            "samples": [
+                                "my birthday is on {dob}",
+                                "my birthday is {dob}",
+                                "My date of birth is {dob}",
+                                "{dob}"
+                            ]
+                        },
+                        {
+                            "name": "phone",
+                            "type": "AMAZON.PhoneNumber",
+                            "samples": [
+                                "My cell number is {phone}",
+                                "My home number is {phone}",
+                                "My home phone number is {phone}",
+                                "My cellphone number is {phone}",
+                                "My number is {phone}",
+                                "My phone number is {phone}",
+                                "{phone}"
+                            ]
+                        },
+                        {
+                            "name": "referringDoctor",
+                            "type": "AMAZON.Person",
+                            "samples": [
+                                "{referringDoctor} referred me to Dr. Navarro",
+                                "{referringDoctor} referred me",
+                                "{referringDoctor}"
+                            ]
+                        },
+                        {
+                            "name": "demographic",
+                            "type": "AMAZON.SearchQuery",
+                            "samples": [
+                                "I am {demographic}",
+                                "{demographic}"
+                            ]
+                        },
+                        {
+                            "name": "otherDemographic",
+                            "type": "AMAZON.SearchQuery",
+                            "samples": [
+                                "I am {otherDemographic}",
+                                "{otherDemographic}"
+                            ]
+                        },
+                        {
+                            "name": "medication",
+                            "type": "YesNoType",
+                            "samples": [
+                                "I am taking {medication}",
+                                "{medication}"
+                            ]
+                        },
+                        {
+                            "name": "prescriptions",
+                            "type": "AMAZON.SearchQuery",
+                            "samples": [
+                                "I am taking {prescriptions}",
+                                "{prescriptions}"
+                            ]
+                        },
+                        {
+                            "name": "history",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{history}"
+                            ]
+                        },
+                        {
+                            "name": "prior",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{prior}"
+                            ]
+                        },
+                        {
+                            "name": "pressure",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{pressure}"
+                            ]
+                        },
+                        {
+                            "name": "trauma",
+                            "type": "YesNoType",
+                            "samples": [
+                                "{trauma}"
+                            ]
+                        },
+                        {
+                            "name": "reason",
+                            "type": "AMAZON.SearchQuery",
+                            "samples": [
+                                "{reason}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "Dr. Navarro Survey"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "YesNoType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "No"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Yes"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "IDKOptions",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "skip"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "elaborate"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "SurveyNameType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "Dr. Navarro Survey",
+                                "synonyms": [
+                                    "DemoSurvey"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Dr. Ken Survey",
+                                "synonyms": [
+                                    "KenSurvey"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Dr. Brown Appointment Survey",
+                                "synonyms": [
+                                    "TestSurvey"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "UnlimitedResponseType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "anything"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "TestSurvey",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "name",
+                            "type": "AMAZON.Person",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1282764452121.1071229519956"
+                            }
+                        },
+                        {
+                            "name": "age",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1051973715318.1070582189309"
+                            }
+                        },
+                        {
+                            "name": "weight",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1051973715318.556845020059"
+                            }
+                        },
+                        {
+                            "name": "reason",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1051973715318.1445808967869"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "TestFixField",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "fieldToBeFixedValue",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1323001340820.926325518295"
+                            }
+                        },
+                        {
+                            "name": "fieldToBeFixed",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "IDKIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "option",
+                            "type": "IDKOptions",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1429551484449.711070738984"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "KenSurvey",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "history",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.715353235289"
+                            }
+                        },
+                        {
+                            "name": "prior",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.1524163073978"
+                            }
+                        },
+                        {
+                            "name": "pressure",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.256250688696"
+                            }
+                        },
+                        {
+                            "name": "effects",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.245626619642"
+                            }
+                        },
+                        {
+                            "name": "failure",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.1066772133150"
+                            }
+                        },
+                        {
+                            "name": "typicalPressure",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.721749395741"
+                            }
+                        },
+                        {
+                            "name": "spray",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.94286273311"
+                            }
+                        },
+                        {
+                            "name": "trauma",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.133917579945"
+                            }
+                        },
+                        {
+                            "name": "thinner",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.614107577301"
+                            }
+                        },
+                        {
+                            "name": "diabetes",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.400310435379.432191645089"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ContinueIntent",
+                    "delegationStrategy": "ALWAYS",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "surveyName",
+                            "type": "SurveyNameType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {},
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.170209144318.202363380212.824328470864"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "ReviewIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "survey",
+                            "type": "SurveyNameType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {},
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.250443157652.1336423623412.1460750626499"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "DemoSurvey",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "name",
+                            "type": "AMAZON.Person",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.1034054073307"
+                            }
+                        },
+                        {
+                            "name": "dob",
+                            "type": "AMAZON.DATE",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.86369915423"
+                            }
+                        },
+                        {
+                            "name": "phone",
+                            "type": "AMAZON.PhoneNumber",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.798920552162"
+                            }
+                        },
+                        {
+                            "name": "referringDoctor",
+                            "type": "AMAZON.Person",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.335802176979"
+                            }
+                        },
+                        {
+                            "name": "demographic",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.882910695465"
+                            }
+                        },
+                        {
+                            "name": "otherDemographic",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.1014314532652"
+                            }
+                        },
+                        {
+                            "name": "medication",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.720068770207"
+                            }
+                        },
+                        {
+                            "name": "prescriptions",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.1171417528036"
+                            }
+                        },
+                        {
+                            "name": "history",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.1303439962952"
+                            }
+                        },
+                        {
+                            "name": "prior",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.719674266481"
+                            }
+                        },
+                        {
+                            "name": "pressure",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.201105273976"
+                            }
+                        },
+                        {
+                            "name": "trauma",
+                            "type": "YesNoType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.1549701001521"
+                            }
+                        },
+                        {
+                            "name": "reason",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.164917503015.178473077868"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "SKILL_RESPONSE"
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.1282764452121.1071229519956",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is your name?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.848426295322.604875930358",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What value do you want this {fieldToBeFixed} to be?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1051973715318.1070582189309",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is your age?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1323001340820.926325518295",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What do you want {fieldToBeFixed} to be?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1051973715318.556845020059",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is your weight in pounds?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1051973715318.1445808967869",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is your reason for your visit with Dr. Browne?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.262268744851.830270933648",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is your desired appointment date?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1429551484449.711070738984",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Do you want me to elaborate on this question or do you want me to skip it?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.715353235289",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Any family history of glaucoma?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.1524163073978",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Any prior eye surgery or laser?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.256250688696",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Do you know what your highest eye pressure ever was?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.245626619642",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Do you have any adverse side effects to any glaucoma eyedrops before?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.1066772133150",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Do you have heart failure or asthma?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.721749395741",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What's your typical eye pressure when you were followed by your previous doctor?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.94286273311",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Are you using any nasal spray, or systemic steroid medication?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.133917579945",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Any previous trauma to or near the eye since infancy?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.614107577301",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Are you on blood thinner?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.400310435379.432191645089",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Do you have diabetes?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1529010474015.1299688959097",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Which survey would you like to continue?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.452333225784.1260122408873.1442295376882",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Sorry, I didn't quite get that. Try saying a date between January first, nineteen ninety, to may fifth, twenty nineteen"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.326723845821.1542516621308.1024002257081",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please choose a valid date"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.326723845821.1542516621308",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Appointment date?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.326723845821.393397135422",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "appointment date?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.326723845821.393397135422.634572788847",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please choose a valid date"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.326723845821.1373252364022",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "date?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.170209144318.202363380212.824328470864",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "I don't understand. Please say the name of an available survey."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.250443157652.1336423623412.1460750626499",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Sorry, please say one of the surveys available to you."
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.3133151224.498361497553.272853230867",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Sorry, that's not an acceptable value. Please say something greater than fifty"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.824270961323.707120315994",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is your eye pressure?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.1034054073307",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the patient's name?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.86369915423",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the patient's date of birth?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.798920552162",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the patient's phone number?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.335802176979",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Who referred the patient to Dr. Navarro?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.1014314532652",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What ethnicity does the patient fall under?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.1171417528036",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What medications or prescriptions is the patient taking?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.719674266481",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Has the patient had any prior eye surgery or laser?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.201105273976",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What was the patient's highest eye pressure?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.1549701001521",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Has the patient had any previous trauma to or near the eye since infancy?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.720068770207",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Is the patient taking any medication?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.882910695465",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Is the patient Native American, Latino, Asian, Black or African American, Native Hawaiian, White, or none of the above?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.178473077868",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the patient's reason for visiting Dr. Navarro?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.164917503015.1303439962952",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Does the patient have any family history of glaucoma?"
+                    }
+                ]
+            }
+        ]
+    }
+}
