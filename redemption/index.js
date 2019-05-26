@@ -135,6 +135,18 @@ const BeginFormHandler = {
         if(survey.attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
           survey.findPreviouslyElicitedSlot(handlerInput);
         }
+        //Error handling and validations go here
+        if(survey.validate(handlerInput)){
+          survey.saveSurveyState(handlerInput);
+          survey.saveAttributes(handlerInput);
+        }
+        else{
+          return handlerInput.responseBuilder
+          //.speak(survey.validationMessages[survey.previouslyElicitedSlot])
+          .speak("Reprompting: " + survey.slotDict[survey.currentSlot])
+          .addElicitSlotDirective(survey.currentSlot)
+          .getResponse();
+        }
         survey.saveSurveyState(handlerInput);
         survey.saveAttributes(handlerInput);
     }

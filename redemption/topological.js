@@ -1,3 +1,5 @@
+const reservedUtterances = ["continue", "can i review my answers", "review", "skip", "next", "previous"];
+
 module.exports = class Survey {
     constructor(surveyName) {
         this.questions = this.loadModel(surveyName);
@@ -52,6 +54,8 @@ module.exports = class Survey {
                               "DemoSurvey":"13",
                              }
         this.slotDict = this.loadSlotDict();
+        this.validationMessages = this.loadValidationMessages();
+        this.slotTypes = this.loadSlotTypes();
     }
 
     loadModel(surveyName){
@@ -75,14 +79,21 @@ module.exports = class Survey {
       }
 
     findPreviouslyElicitedSlot(handlerInput){
-        Object.keys(handlerInput.requestEnvelope.request.intent.slots).forEach(key => {
-          if(handlerInput.requestEnvelope.request.intent.slots[key]["value"] != 
-            this.attributes["temp_" + this.surveyName]["slots"][key]["value"]){
-              this.previouslyElicitedSlot["field"] = key;
-              this.previouslyElicitedSlot["fieldValue"] =  handlerInput.requestEnvelope.request.intent.slots[key]["value"]
+      for(var i = 0 ; i < Object.keys(handlerInput.requestEnvelope.request.intent.slots).length ; i++){
+        var slotName = Object.keys(handlerInput.requestEnvelope.request.intent.slots)[i];
+        console.log("HANDLER INPUT SLOT: " + slotName);
+        console.log("HANDLER INPUT SLOT VALUE: " + handlerInput.requestEnvelope.request.intent.slots[slotName].value);
+        console.log("ATTR SLOT VALUE: " + this.attributes["temp_" + this.surveyName].slots[slotName].value);
+        if(handlerInput.requestEnvelope.request.intent.slots[slotName].value != 
+          this.attributes["temp_" + this.surveyName].slots[slotName].value){
+              this.previouslyElicitedSlot["field"] = slotName;
+              this.previouslyElicitedSlot["fieldValue"] =  handlerInput.requestEnvelope.request.intent.slots[slotName].value;
+              break;
             }
-          
-        });
+        else{
+          this.previouslyElicitedSlot = {"field": null, "fieldValue": null};
+        }
+      }
     }
 
     saveSurveyState(handlerInput){
@@ -96,6 +107,7 @@ module.exports = class Survey {
                       saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot];
                     });
                 }
+                saveState[this.surveyName]["surveyIntroduction"] = this.introductions[this.surveyName];
                 saveState[this.surveyName]["questionOrder"] = this.questions;
                 saveState[this.surveyName]["currentSlot"] = this.currentSlot;
                 saveState[this.surveyName]["flow"] = this.flowChanged;
@@ -256,6 +268,56 @@ module.exports = class Survey {
         return slotDict;
       } catch(err) {
         console.error(err);
+      }
+    }
+
+    loadSlotTypes(){
+      var types = {};
+      const fs = require('fs');
+      const fileContents = fs.readFileSync('./model.json', 'utf8');
+      try {
+        const data = JSON.parse(fileContents);
+        data.interactionModel.languageModel.intents.forEach((intent) => {
+          if(intent.name == this.surveyName){
+            intent.slots.forEach((slot) => {
+              console.log(slot);
+              types[slot.name] = slot.type;
+            })
+          }
+        })
+      } catch(err) {
+        console.error(err);
+      }
+      return types;
+    }
+
+    loadValidationMessages(){
+
+    }
+
+    validate(handlerInput){
+      //This method will return a boolean based on if the validation passes
+      //Make sure to specify.field or .fieldValue
+
+      //The skill broke because it couldn't accept a DATE value. My way of handling it.
+      //Also, I think currentSlot and previouslyElicitedSlot.field are the same under the != COMPLETED condition.
+      //Therefore Might trash the previouslyElicitedSlot
+      console.log("VALIDATE FIELD" + this.currentSlot);
+      console.log(this.slotTypes[this.currentSlot]);
+      switch(this.slotTypes[this.currentSlot]) {
+        case "AMAZON.SearchQuery":
+          break;
+        case "AMAZON.DATE":
+          // code block
+          break;
+        case "AMAZON.NUMBER":
+          break;
+        case "AMAZON.PhoneNumber":
+          break;
+        case "YesNoType":
+          break;
+        default:
+          return true;
       }
     }
 }
