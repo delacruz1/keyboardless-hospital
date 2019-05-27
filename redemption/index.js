@@ -154,7 +154,7 @@ const BeginFormHandler = {
       if(survey.nextSlotExists()){
         survey.advanceSlots();
       }
-      else if(!survey.nextSlotExists() && survey.flowChanged){
+      else if(!survey.nextSlotExists() && survey.flowChanged && !survey.isComplete(handlerInput)){
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
@@ -171,6 +171,16 @@ const BeginFormHandler = {
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
     }*/
+
+    if(handlerInput.requestEnvelope.request.dialogState === "COMPLETED" || survey.isComplete(handlerInput)){
+      survey.reviewSurvey = handlerInput.requestEnvelope.request.intent.name;
+      survey.attributes["temp_" + survey.reviewSurvey] = handlerInput.requestEnvelope.request.intent;
+      survey.saveSurveyState(handlerInput);
+      return handlerInput.responseBuilder
+     .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
+     .getResponse()
+  }
+
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && survey.flowChanged){
         return handlerInput.responseBuilder
         .speak(survey.slotDict[survey.currentSlot])       
@@ -182,14 +192,6 @@ const BeginFormHandler = {
       return handlerInput.responseBuilder
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
-    }
-    else {
-        survey.reviewSurvey = handlerInput.requestEnvelope.request.intent.name;
-        survey.attributes["temp_" + survey.reviewSurvey] = handlerInput.requestEnvelope.request.intent;
-        survey.saveSurveyState(handlerInput);
-        return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
-       .getResponse()
     }
   }
 };

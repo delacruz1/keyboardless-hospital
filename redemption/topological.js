@@ -56,6 +56,7 @@ module.exports = class Survey {
         this.slotDict = this.loadSlotDict();
         this.validationMessages = this.loadValidationMessages();
         this.slotTypes = this.loadSlotTypes();
+        this.optionalQuestions = ["dob"];
     }
 
     loadModel(surveyName){
@@ -81,9 +82,6 @@ module.exports = class Survey {
     findPreviouslyElicitedSlot(handlerInput){
       for(var i = 0 ; i < Object.keys(handlerInput.requestEnvelope.request.intent.slots).length ; i++){
         var slotName = Object.keys(handlerInput.requestEnvelope.request.intent.slots)[i];
-        console.log("HANDLER INPUT SLOT: " + slotName);
-        console.log("HANDLER INPUT SLOT VALUE: " + handlerInput.requestEnvelope.request.intent.slots[slotName].value);
-        console.log("ATTR SLOT VALUE: " + this.attributes["temp_" + this.surveyName].slots[slotName].value);
         if(handlerInput.requestEnvelope.request.intent.slots[slotName].value != 
           this.attributes["temp_" + this.surveyName].slots[slotName].value){
               this.previouslyElicitedSlot["field"] = slotName;
@@ -324,6 +322,37 @@ module.exports = class Survey {
         default:
           return true;
       }
+    }
+
+    isOptional(slot){
+      return this.optionalQuestions.includes(slot);
+    }
+
+    isComplete(handlerInput){
+      for(let key of Object.keys(handlerInput.requestEnvelope.request.intent.slots)){
+        console.log("CHECKING IF " + key + "HAS A VALUE");
+        if(!handlerInput.requestEnvelope.request.intent.slots[key].value){
+          if(this.isOptional(key)){
+            console.log(key + " DOES NOT HAVE A VALUE, BUT IS OPTIONAL");
+            continue;
+          }
+          else if(Object.keys(this.tree).includes(key)){
+            if(handlerInput.requestEnvelope.request.intent.slots[this.tree[key].dependency.parent].value != this.tree[key].dependency.requiredValue){
+              console.log(key + " DOES NOT HAVE A VALUE, BUT REQUIREMENT WAS NOT SATISFIED");
+              continue;
+            }
+            else{
+              console.log(key + " DOES NOT HAVE A VALUE AND ITS CONDITION WAS SATISFIED");
+              return false;
+            }
+          }
+          else{
+            console.log(key + " DOES NOT HAVE A VALUE AND IS REQUIRED");
+            return false;
+          }
+        }
+      }
+      return true;
     }
 }
 

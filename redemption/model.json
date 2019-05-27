@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "sesame",
+            "invocationName": "thanos",
             "intents": [
                 {
                     "name": "AMAZON.FallbackIntent",
@@ -37,17 +37,12 @@
                             "name": "age",
                             "type": "AMAZON.NUMBER",
                             "samples": [
-                                "i don't know",
                                 "{age}"
                             ]
                         },
                         {
                             "name": "weight",
-                            "type": "AMAZON.NUMBER",
-                            "samples": [
-                                "{weight} pounds",
-                                "{weight}"
-                            ]
+                            "type": "AMAZON.NUMBER"
                         },
                         {
                             "name": "reason",
@@ -229,9 +224,6 @@
                             "name": "dob",
                             "type": "AMAZON.DATE",
                             "samples": [
-                                "my birthday is on {dob}",
-                                "my birthday is {dob}",
-                                "My date of birth is {dob}",
                                 "{dob}"
                             ]
                         },
@@ -431,10 +423,8 @@
                             "name": "weight",
                             "type": "AMAZON.NUMBER",
                             "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.1051973715318.556845020059"
-                            }
+                            "elicitationRequired": false,
+                            "prompts": {}
                         },
                         {
                             "name": "reason",
@@ -644,7 +634,7 @@
                             "confirmationRequired": false,
                             "elicitationRequired": true,
                             "prompts": {
-                                "elicitation": "Elicit.Slot.164917503015.86369915423"
+                                "elicitation": "Elicit.Slot.1125215778101.1543653981877"
                             }
                         },
                         {
@@ -1127,6 +1117,15 @@
                     {
                         "type": "PlainText",
                         "value": "Does the patient have any family history of glaucoma?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1125215778101.1543653981877",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "This question is optional, so you can skip it if you want. What is the patient's date of birth?"
                     }
                 ]
             }
