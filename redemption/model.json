@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "thanos",
+            "invocationName": "sesame",
             "intents": [
                 {
                     "name": "AMAZON.FallbackIntent",

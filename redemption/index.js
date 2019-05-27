@@ -147,8 +147,6 @@ const BeginFormHandler = {
           .addElicitSlotDirective(survey.currentSlot)
           .getResponse();
         }
-        survey.saveSurveyState(handlerInput);
-        survey.saveAttributes(handlerInput);
     }
 
     //Update the slot variables
