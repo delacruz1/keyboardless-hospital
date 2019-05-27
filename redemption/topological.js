@@ -56,6 +56,7 @@ module.exports = class Survey {
         this.slotDict = this.loadSlotDict();
         this.validationMessages = this.loadValidationMessages();
         this.slotTypes = this.loadSlotTypes();
+        this.optionalQuestions = ["dob"];
     }
 
     loadModel(surveyName){
@@ -81,9 +82,6 @@ module.exports = class Survey {
     findPreviouslyElicitedSlot(handlerInput){
       for(var i = 0 ; i < Object.keys(handlerInput.requestEnvelope.request.intent.slots).length ; i++){
         var slotName = Object.keys(handlerInput.requestEnvelope.request.intent.slots)[i];
-        console.log("HANDLER INPUT SLOT: " + slotName);
-        console.log("HANDLER INPUT SLOT VALUE: " + handlerInput.requestEnvelope.request.intent.slots[slotName].value);
-        console.log("ATTR SLOT VALUE: " + this.attributes["temp_" + this.surveyName].slots[slotName].value);
         if(handlerInput.requestEnvelope.request.intent.slots[slotName].value != 
           this.attributes["temp_" + this.surveyName].slots[slotName].value){
               this.previouslyElicitedSlot["field"] = slotName;
@@ -297,27 +295,132 @@ module.exports = class Survey {
 
     validate(handlerInput){
       //This method will return a boolean based on if the validation passes
-      //Make sure to specify.field or .fieldValue
+      //Make sure to specify: .field or .fieldValue
 
       //The skill broke because it couldn't accept a DATE value. My way of handling it.
       //Also, I think currentSlot and previouslyElicitedSlot.field are the same under the != COMPLETED condition.
       //Therefore Might trash the previouslyElicitedSlot
       console.log("VALIDATE FIELD" + this.currentSlot);
       console.log(this.slotTypes[this.currentSlot]);
+	  var slotValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value;
       switch(this.slotTypes[this.currentSlot]) {
         case "AMAZON.SearchQuery":
+		return true;
           break;
         case "AMAZON.DATE":
-          // code block
+          return validateDate(slotValue);
           break;
         case "AMAZON.NUMBER":
+		  return validateNumber(slotValue);
           break;
         case "AMAZON.PhoneNumber":
+		  return validatePhone(slotValue);
           break;
         case "YesNoType":
+			return true;
           break;
         default:
           return true;
       }
     }
+
+    isOptional(slot){
+      return this.optionalQuestions.includes(slot);
+    }
+
+    isComplete(handlerInput){
+      for(let key of Object.keys(handlerInput.requestEnvelope.request.intent.slots)){
+        console.log("CHECKING IF " + key + "HAS A VALUE");
+        if(!handlerInput.requestEnvelope.request.intent.slots[key].value){
+          if(this.isOptional(key)){
+            console.log(key + " DOES NOT HAVE A VALUE, BUT IS OPTIONAL");
+            continue;
+          }
+          else if(Object.keys(this.tree).includes(key)){
+            if(handlerInput.requestEnvelope.request.intent.slots[this.tree[key].dependency.parent].value != this.tree[key].dependency.requiredValue){
+              console.log(key + " DOES NOT HAVE A VALUE, BUT REQUIREMENT WAS NOT SATISFIED");
+              continue;
+            }
+            else{
+              console.log(key + " DOES NOT HAVE A VALUE AND ITS CONDITION WAS SATISFIED");
+              return false;
+            }
+          }
+          else{
+            console.log(key + " DOES NOT HAVE A VALUE AND IS REQUIRED");
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+}
+
+//Date
+function validateDate(input)
+{
+	console.log("VALIDATE DATE: " + input);
+	if (!input) return false;
+	var date_re = /^\d{3}[\d,X](-((WI|SP|SU|FA)|(\d{2})(-(\d{2}))?|W(\d{2})(-WE)?))?$/;
+	var match = input.match(date_re);
+	if (!match) return false;
+
+	var month = match[4];
+	var day = match[6];
+	var week = match[7];
+
+	if (month)
+	{
+		month = parseInt(month);
+		if (month < 1) return false;
+		if (month > 12) return false;
+	}
+	if (day)
+	{
+		day = parseInt(day);
+		if (day < 1) return false;
+		if (day > 31) return false;
+	}
+	console.log(week);
+	if (week)
+	{
+		week = parseInt(week);
+		if (week < 1) return false;
+		if (week > 52) return false;
+	}
+	return true;
+}
+
+//Phone
+function validatePhone(input)
+{
+	console.log("VALIDATE PHONE: " + input);
+	if (!input) return false;
+	var phone_re = /^(\+?\d{11}|\d{10}|\d{7})$/;
+	var match = input.match(phone_re);
+	if (match)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+//Number
+function validateNumber(input)
+{
+	console.log("VALIDATE NUMBER: " + input);
+	if (!input) return false;
+	var num_re = /^\d+$/;
+	var match = input.match(num_re);
+	if (match)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
