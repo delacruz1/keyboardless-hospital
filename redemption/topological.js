@@ -43,7 +43,7 @@ module.exports = class Survey {
         this.introductions = {
                               "TestSurvey":"4",
                               "KenSurvey":"This survey collects information regarding any optical damage or pre-conditions which could lead to glaucoma. The survey is 10 questions long.",
-                              "DemoSurvey":"This is a pre-screening survey that Dr. Navarro would like yout to fill out prior to your appointment with her. The survey is 13 questions long. If you do not know how to respond at any time, say: I don't know." ,
+                              "DemoSurvey":"This is a pre-screening survey that Dr. Navarro would like you to fill out prior to your appointment with her. The survey is 13 questions long. If you do not know how to respond at any time, say: I don't know." ,
                              }
         this.slotDict = this.loadSlotDict();
         this.validationMessages = this.loadValidationMessages();
