@@ -302,22 +302,22 @@ module.exports = class Survey {
       //Therefore Might trash the previouslyElicitedSlot
       console.log("VALIDATE FIELD" + this.currentSlot);
       console.log(this.slotTypes[this.currentSlot]);
-	  var slotValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value;
+	    var slotValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value;
       switch(this.slotTypes[this.currentSlot]) {
         case "AMAZON.SearchQuery":
-		return true;
+		        return true;
           break;
         case "AMAZON.DATE":
           return validateDate(slotValue, this.attributes["temp_" + this.surveyName].slots[this.currentSlot].value);
           break;
         case "AMAZON.NUMBER":
-		  return validateNumber(slotValue);
-          break;
+		        return validateNumber(slotValue);
+        break;
         case "AMAZON.PhoneNumber":
-		  return validatePhone(slotValue);
+		        return validatePhone(slotValue);
           break;
         case "YesNoType":
-			return true;
+			      return validateYesNo(slotValue);
           break;
         default:
           return true;
@@ -424,4 +424,20 @@ function validateNumber(input)
 	{
 		return false;
 	}
+}
+
+
+// YesNo
+function validateYesNo(input)
+{
+  console.log("VALIDATE YESNO: " + input);
+  if (!input) return false;
+  var synonyms = ["YES", "NO", "YEAH", "NAH"];
+  for (var i = 0; i < synonyms.length; i++){
+    if (input.toUpperCase() == synonyms[i]){
+      return true;
+    }
+  }
+  return false;
+
 }
