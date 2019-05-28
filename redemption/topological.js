@@ -37,19 +37,21 @@ module.exports = class Survey {
         this.reviewSurvey = null;
         this.surveyName = surveyName;
         this.elaborations = {"history":"Glaucoma is a group of eye conditions that damage the optic nerve, the health of which is vital for good vision. This damage is often caused by an abnormally high pressure in your eye and is one of the leading causes of blindness. Do you have any knowledge of any family member in the past that has experienced glaucoma?",
-                                "prior": "Have you had any surgecil procedures or laser applied to improve any condition of your eyes?",
-                                "pressure":"Eye pressure is measured in millimeters of mercury. Normal eye pressure ranges from 12 to 22 millimeters of mercury.",
-                                "effects":"Common side effects experienced with carbonic anhydrase inhibitor eye drops include burning, a bitter taste, eyelid reactions and eye redness. Have you experienced any of this or something different?",
-                                "failure":"Heart failure is the condition where your heart is not able to pump enough blood to meet the body's needs. Common symptoms of these are shortness of breath and major fatigue. Asthma is a condition in which your airways narrow and swell and produce extra mucus. This can make breathing difficult and trigger coughing, wheezing and shortness of breath.",
-                                "typicalPressure":"Eye pressure is measured in millimeters of mercury. Normal eye pressure ranges from 12 to 22 millimeters of mercury.",
-                                "spray":"Nasal spray is a medication that provides powerful nasal congestion relief.",
-                                "trauma":"Do you recall any previous injury, trauma or detrimental condition to the eye or nearby regions?",
-                                "thinner":"Blood thinners are medicines that prevent blood clots from forming. They also keep existing blood clots from getting larger. Are you on blood thinner?",
-                                "diabetes":"Diabetes is a disease in which your blood glucose, or blood sugar, levels are too high. Some symptoms include increased thirst, extreme hunger, and unexplained weight loss. Do you have diabetes?"};
+                              "prior": "Have you had any surgecil procedures or laser applied to improve any condition of your eyes?",
+                              "pressure":"Eye pressure is measured in millimeters of mercury. Normal eye pressure ranges from 12 to 22 millimeters of mercury.",
+                              "effects":"Common side effects experienced with carbonic anhydrase inhibitor eye drops include burning, a bitter taste, eyelid reactions and eye redness. Have you experienced any of this or something different?",
+                              "failure":"Heart failure is the condition where your heart is not able to pump enough blood to meet the body's needs. Common symptoms of these are shortness of breath and major fatigue. Asthma is a condition in which your airways narrow and swell and produce extra mucus. This can make breathing difficult and trigger coughing, wheezing and shortness of breath.",
+                              "typicalPressure":"Eye pressure is measured in millimeters of mercury. Normal eye pressure ranges from 12 to 22 millimeters of mercury.",
+                              "spray":"Nasal spray is a medication that provides powerful nasal congestion relief.",
+                              "trauma":"Do you recall any previous injury, trauma or detrimental condition to the eye or nearby regions?",
+                              "thinner":"Blood thinners are medicines that prevent blood clots from forming. They also keep existing blood clots from getting larger. Are you on blood thinner?",
+                              "diabetes":"Diabetes is a disease in which your blood glucose, or blood sugar, levels are too high. Some symptoms include increased thirst, extreme hunger, and unexplained weight loss. Do you have diabetes?"
+                              "medication":"Yes/no question",
+                              "prescriptions":"Please state any prescriptions or medications that the patient is currently taking" };
         this.introductions = {
                               "TestSurvey":"4",
                               "KenSurvey":"This survey collects information regarding any optical damage or pre-conditions which could lead to glaucoma. The survey is 10 questions long.",
-                              "DemoSurvey":"13",
+                              "DemoSurvey":"This is a pre-screening survey that Dr. Navarro would like yout to fill out prior to your appointment with her. The survey is 13 questions long. If you do not know how to respond at any time, say: I don't know." ,
                              }
         this.slotDict = this.loadSlotDict();
     }
