@@ -1,17 +1,7 @@
-const reservedUtterances = ["continue", "can i review my answers", "review", "skip", "next", "previous"];
-
 module.exports = class Survey {
     constructor(surveyName) {
         this.questions = this.loadModel(surveyName);
         this.tree = {
-          "prior": {
-            "dependency": {
-              "parent": "history",
-              "requiredValue": "yes"
-            },
-            "forwardSlot": "pressure",
-            "backSlot": "history"
-          },
           "otherDemographic": {
             "dependency": {
               "parent": "demographic",
@@ -117,7 +107,29 @@ module.exports = class Survey {
                 reject(error);
             });
         });
-    } // try to split the function so that you can call the secondary function only at next & prev...
+    }
+    
+    saveSurveyStateFromAttributes(handlerInput){
+      return new Promise((resolve, reject) => {
+          handlerInput.attributesManager.getPersistentAttributes()
+          .then((saveState) => { // pick up here, you did need to check that dictionary
+              saveState[this.surveyName] = this.attributes["temp_" + this.surveyName];
+              saveState[this.surveyName]["surveyIntroduction"] = this.introductions[this.surveyName];
+              saveState[this.surveyName]["questionOrder"] = this.questions;
+              saveState[this.surveyName]["currentSlot"] = this.currentSlot;
+              saveState[this.surveyName]["flow"] = this.flowChanged;
+              Object.keys(saveState[this.surveyName].slots).forEach((slot) => {
+                saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot];
+              });
+              handlerInput.attributesManager.setPersistentAttributes(saveState);
+              handlerInput.attributesManager.savePersistentAttributes();
+          })
+          .catch((error) => {
+              console.log(error);
+              reject(error);
+          });
+      });
+  }// try to split the function so that you can call the secondary function only at next & prev...
 
     loadSurveyState(saveState, surveyName){
       this.questions = this.loadModel(surveyName);
@@ -306,19 +318,14 @@ module.exports = class Survey {
       switch(this.slotTypes[this.currentSlot]) {
         case "AMAZON.SearchQuery":
 		        return true;
-          break;
         case "AMAZON.DATE":
           return validateDate(slotValue, this.attributes["temp_" + this.surveyName].slots[this.currentSlot].value);
-          break;
         case "AMAZON.NUMBER":
 		        return validateNumber(slotValue);
-        break;
         case "AMAZON.PhoneNumber":
 		        return validatePhone(slotValue);
-          break;
         case "YesNoType":
 			      return validateYesNo(slotValue);
-          break;
         default:
           return true;
       }
@@ -353,6 +360,66 @@ module.exports = class Survey {
         }
       }
       return true;
+    }
+
+    intentDetected(handlerInput){
+      const reservedUtterances = ["skip", "next", "previous"];
+      var lowercaseValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value.toLowerCase();
+      console.log("CAPTURED VALUE: " + lowercaseValue);
+      return reservedUtterances.includes(lowercaseValue);
+    }
+
+    checkSearchQuery(handlerInput){
+      //Perform each intent here depending on value
+      var lowercaseValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value.toLowerCase();
+
+      if(lowercaseValue == "next" || lowercaseValue == "skip"){
+        this.flowChanged = true;
+        //This is activated once one answer has been given. Get the 
+        if(this.nextSlotExists()){
+          this.advanceSlots();
+          this.saveSurveyStateFromAttributes(handlerInput);
+          console.log("NEXT INTENT, PREVIOUS SLOT: " + this.previousSlot);
+          console.log("NEXT INTENT, CURRENT SLOT: " + this.currentSlot);
+          console.log("NEXT INTENT, NEXT SLOT: " + this.nextSlot);
+
+          return handlerInput.responseBuilder
+          .speak(this.slotDict[this.currentSlot])       
+          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot])
+          .addElicitSlotDirective(this.currentSlot,
+              this.attributes["temp_" + this.surveyName])
+          .getResponse();
+        }
+        else{
+          return handlerInput.responseBuilder
+          .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
+          .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+          .getResponse();
+        }
+      }
+      else if(lowercaseValue == "previous"){
+        //reserved.previous(this, handlerInput);
+        if(this.previousSlotExists()){
+          this.retractSlots();
+          this.saveSurveyStateFromAttributes(handlerInput);
+          console.log("PREV INTENT, PREVIOUS SLOT: " + this.previousSlot);
+          console.log("PREV INTENT, CURRENT SLOT: " + this.currentSlot);
+          console.log("PREV INTENT, NEXT SLOT: " + this.nextSlot);
+      
+          return handlerInput.responseBuilder
+          .speak(this.slotDict[this.currentSlot])
+          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot])
+          .addElicitSlotDirective(this.currentSlot,
+                  this.attributes["temp_" + this.surveyName])
+          .getResponse();
+      }
+        else{
+            return handlerInput.responseBuilder
+            .speak("There are no previous questions. Do you want to continue?")
+            .reprompt("Hi user. There are no previous questions. Do you want to continue?")
+            .getResponse();
+        }
+      }
     }
 }
 

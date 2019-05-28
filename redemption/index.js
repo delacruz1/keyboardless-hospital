@@ -136,7 +136,11 @@ const BeginFormHandler = {
         if(survey.attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
           survey.findPreviouslyElicitedSlot(handlerInput);
         }
-        //Error handling and validations go here
+        //Validating SearchQuery type, just to make sure we handle intent sample utterancs appropriately
+        if(survey.slotTypes[survey.currentSlot] == "AMAZON.SearchQuery" && survey.intentDetected(handlerInput)){
+          return survey.checkSearchQuery(handlerInput);
+        }
+        //Error handling and validations go here for types other than SearchQuery
         if(survey.validate(handlerInput)){
           survey.saveSurveyState(handlerInput);
           survey.saveAttributes(handlerInput);
@@ -290,19 +294,19 @@ const IDKHandler = {
           .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
-        // Elaborate
-        if (handlerInput.requestEnvelope.request.intent.slots.option.value === "elaborate"){
-          return handlerInput.responseBuilder
-          .speak(survey.elaborations[survey.currentSlot])
-          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
-          .getResponse();
-        }
-        //  * 1st phase design:  store locally with new objects
-        //  * 2nd phase design:  grab from database eventually
+      }
+      // Elaborate
+      if (handlerInput.requestEnvelope.request.intent.slots.option.value === "elaborate"){
+        return handlerInput.responseBuilder
+        .speak(survey.elaborations[survey.currentSlot])
+        .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
+        .getResponse();
+      }
+      //  * 1st phase design:  store locally with new objects
+      //  * 2nd phase design:  grab from database eventually
       return handlerInput.responseBuilder
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
-      }
     }
   };
 
