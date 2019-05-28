@@ -45,7 +45,7 @@ module.exports = class Survey {
                               "spray":"Nasal spray is a medication that provides powerful nasal congestion relief.",
                               "trauma":"Do you recall any previous injury, trauma or detrimental condition to the eye or nearby regions?",
                               "thinner":"Blood thinners are medicines that prevent blood clots from forming. They also keep existing blood clots from getting larger. Are you on blood thinner?",
-                              "diabetes":"Diabetes is a disease in which your blood glucose, or blood sugar, levels are too high. Some symptoms include increased thirst, extreme hunger, and unexplained weight loss. Do you have diabetes?"
+                              "diabetes":"Diabetes is a disease in which your blood glucose, or blood sugar, levels are too high. Some symptoms include increased thirst, extreme hunger, and unexplained weight loss. Do you have diabetes?",
                               "medication":"Yes/no question",
                               "prescriptions":"Please state any prescriptions or medications that the patient is currently taking" };
         this.introductions = {
