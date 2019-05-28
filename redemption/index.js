@@ -123,6 +123,7 @@ const BeginFormHandler = {
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
       survey = new Survey(handlerInput.requestEnvelope.request.intent.name);
       survey.saveSurveyState(handlerInput);
+      survey.saveAttributes(handlerInput);
       console.log("STARTED DIALOG, CURRENT SLOT: " + survey.currentSlot);
       console.log("STARTED DIALOG, NEXT SLOT: " + survey.nextSlot);
       return handlerInput.responseBuilder
@@ -144,7 +145,7 @@ const BeginFormHandler = {
           return handlerInput.responseBuilder
           //.speak(survey.validationMessages[survey.previouslyElicitedSlot])
           .speak("Reprompting: " + survey.slotDict[survey.currentSlot])
-          .addElicitSlotDirective(survey.currentSlot)
+          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
     }

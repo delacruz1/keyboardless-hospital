@@ -308,7 +308,7 @@ module.exports = class Survey {
 		return true;
           break;
         case "AMAZON.DATE":
-          return validateDate(slotValue);
+          return validateDate(slotValue, this.attributes["temp_" + this.surveyName].slots[this.currentSlot].value);
           break;
         case "AMAZON.NUMBER":
 		  return validateNumber(slotValue);
@@ -357,10 +357,11 @@ module.exports = class Survey {
 }
 
 //Date
-function validateDate(input)
+function validateDate(input, storedValue)
 {
-	console.log("VALIDATE DATE: " + input);
-	if (!input) return false;
+  console.log("VALIDATE DATE: " + input);
+  console.log("STORED VALUE: " + storedValue);
+	if (!input || input == storedValue) return false;
 	var date_re = /^\d{3}[\d,X](-((WI|SP|SU|FA)|(\d{2})(-(\d{2}))?|W(\d{2})(-WE)?))?$/;
 	var match = input.match(date_re);
 	if (!match) return false;
