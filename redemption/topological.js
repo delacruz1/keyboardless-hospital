@@ -2,14 +2,6 @@ module.exports = class Survey {
     constructor(surveyName) {
         this.questions = this.loadModel(surveyName);
         this.tree = {
-          "prior": {
-            "dependency": {
-              "parent": "history",
-              "requiredValue": "yes"
-            },
-            "forwardSlot": "pressure",
-            "backSlot": "history"
-          },
           "otherDemographic": {
             "dependency": {
               "parent": "demographic",
@@ -54,6 +46,9 @@ module.exports = class Survey {
                               "DemoSurvey":"This is a pre-screening survey that Dr. Navarro would like yout to fill out prior to your appointment with her. The survey is 13 questions long. If you do not know how to respond at any time, say: I don't know." ,
                              }
         this.slotDict = this.loadSlotDict();
+        this.validationMessages = this.loadValidationMessages();
+        this.slotTypes = this.loadSlotTypes();
+        this.optionalQuestions = ["dob"];
     }
 
     loadModel(surveyName){
@@ -77,14 +72,18 @@ module.exports = class Survey {
       }
 
     findPreviouslyElicitedSlot(handlerInput){
-        Object.keys(handlerInput.requestEnvelope.request.intent.slots).forEach(key => {
-          if(handlerInput.requestEnvelope.request.intent.slots[key]["value"] != 
-            this.attributes["temp_" + this.surveyName]["slots"][key]["value"]){
-              this.previouslyElicitedSlot["field"] = key;
-              this.previouslyElicitedSlot["fieldValue"] =  handlerInput.requestEnvelope.request.intent.slots[key]["value"]
+      for(var i = 0 ; i < Object.keys(handlerInput.requestEnvelope.request.intent.slots).length ; i++){
+        var slotName = Object.keys(handlerInput.requestEnvelope.request.intent.slots)[i];
+        if(handlerInput.requestEnvelope.request.intent.slots[slotName].value != 
+          this.attributes["temp_" + this.surveyName].slots[slotName].value){
+              this.previouslyElicitedSlot["field"] = slotName;
+              this.previouslyElicitedSlot["fieldValue"] =  handlerInput.requestEnvelope.request.intent.slots[slotName].value;
+              break;
             }
-          
-        });
+        else{
+          this.previouslyElicitedSlot = {"field": null, "fieldValue": null};
+        }
+      }
     }
 
     saveSurveyState(handlerInput){
@@ -98,6 +97,7 @@ module.exports = class Survey {
                       saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot];
                     });
                 }
+                saveState[this.surveyName]["surveyIntroduction"] = this.introductions[this.surveyName];
                 saveState[this.surveyName]["questionOrder"] = this.questions;
                 saveState[this.surveyName]["currentSlot"] = this.currentSlot;
                 saveState[this.surveyName]["flow"] = this.flowChanged;
@@ -109,7 +109,29 @@ module.exports = class Survey {
                 reject(error);
             });
         });
-    } // try to split the function so that you can call the secondary function only at next & prev...
+    }
+    
+    saveSurveyStateFromAttributes(handlerInput){
+      return new Promise((resolve, reject) => {
+          handlerInput.attributesManager.getPersistentAttributes()
+          .then((saveState) => { // pick up here, you did need to check that dictionary
+              saveState[this.surveyName] = this.attributes["temp_" + this.surveyName];
+              saveState[this.surveyName]["surveyIntroduction"] = this.introductions[this.surveyName];
+              saveState[this.surveyName]["questionOrder"] = this.questions;
+              saveState[this.surveyName]["currentSlot"] = this.currentSlot;
+              saveState[this.surveyName]["flow"] = this.flowChanged;
+              Object.keys(saveState[this.surveyName].slots).forEach((slot) => {
+                saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot];
+              });
+              handlerInput.attributesManager.setPersistentAttributes(saveState);
+              handlerInput.attributesManager.savePersistentAttributes();
+          })
+          .catch((error) => {
+              console.log(error);
+              reject(error);
+          });
+      });
+  }// try to split the function so that you can call the secondary function only at next & prev...
 
     loadSurveyState(saveState, surveyName){
       this.questions = this.loadModel(surveyName);
@@ -260,4 +282,231 @@ module.exports = class Survey {
         console.error(err);
       }
     }
+
+    loadSlotTypes(){
+      var types = {};
+      const fs = require('fs');
+      const fileContents = fs.readFileSync('./model.json', 'utf8');
+      try {
+        const data = JSON.parse(fileContents);
+        data.interactionModel.languageModel.intents.forEach((intent) => {
+          if(intent.name == this.surveyName){
+            intent.slots.forEach((slot) => {
+              console.log(slot);
+              types[slot.name] = slot.type;
+            })
+          }
+        })
+      } catch(err) {
+        console.error(err);
+      }
+      return types;
+    }
+
+    loadValidationMessages(){
+
+    }
+
+    validate(handlerInput){
+      //This method will return a boolean based on if the validation passes
+      //Make sure to specify: .field or .fieldValue
+
+      //The skill broke because it couldn't accept a DATE value. My way of handling it.
+      //Also, I think currentSlot and previouslyElicitedSlot.field are the same under the != COMPLETED condition.
+      //Therefore Might trash the previouslyElicitedSlot
+      console.log("VALIDATE FIELD" + this.currentSlot);
+      console.log(this.slotTypes[this.currentSlot]);
+	    var slotValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value;
+      switch(this.slotTypes[this.currentSlot]) {
+        case "AMAZON.SearchQuery":
+		        return true;
+        case "AMAZON.DATE":
+          return validateDate(slotValue, this.attributes["temp_" + this.surveyName].slots[this.currentSlot].value);
+        case "AMAZON.NUMBER":
+		        return validateNumber(slotValue);
+        case "AMAZON.PhoneNumber":
+		        return validatePhone(slotValue);
+        case "YesNoType":
+			      return validateYesNo(slotValue);
+        default:
+          return true;
+      }
+    }
+
+    isOptional(slot){
+      return this.optionalQuestions.includes(slot);
+    }
+
+    isComplete(handlerInput){
+      for(let key of Object.keys(handlerInput.requestEnvelope.request.intent.slots)){
+        console.log("CHECKING IF " + key + "HAS A VALUE");
+        if(!handlerInput.requestEnvelope.request.intent.slots[key].value){
+          if(this.isOptional(key)){
+            console.log(key + " DOES NOT HAVE A VALUE, BUT IS OPTIONAL");
+            continue;
+          }
+          else if(Object.keys(this.tree).includes(key)){
+            if(handlerInput.requestEnvelope.request.intent.slots[this.tree[key].dependency.parent].value != this.tree[key].dependency.requiredValue){
+              console.log(key + " DOES NOT HAVE A VALUE, BUT REQUIREMENT WAS NOT SATISFIED");
+              continue;
+            }
+            else{
+              console.log(key + " DOES NOT HAVE A VALUE AND ITS CONDITION WAS SATISFIED");
+              return false;
+            }
+          }
+          else{
+            console.log(key + " DOES NOT HAVE A VALUE AND IS REQUIRED");
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    intentDetected(handlerInput){
+      const reservedUtterances = ["skip", "next", "previous"];
+      var lowercaseValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value.toLowerCase();
+      console.log("CAPTURED VALUE: " + lowercaseValue);
+      return reservedUtterances.includes(lowercaseValue);
+    }
+
+    checkSearchQuery(handlerInput){
+      //Perform each intent here depending on value
+      var lowercaseValue = handlerInput.requestEnvelope.request.intent.slots[this.currentSlot].value.toLowerCase();
+
+      if(lowercaseValue == "next" || lowercaseValue == "skip"){
+        this.flowChanged = true;
+        //This is activated once one answer has been given. Get the 
+        if(this.nextSlotExists()){
+          this.advanceSlots();
+          this.saveSurveyStateFromAttributes(handlerInput);
+          console.log("NEXT INTENT, PREVIOUS SLOT: " + this.previousSlot);
+          console.log("NEXT INTENT, CURRENT SLOT: " + this.currentSlot);
+          console.log("NEXT INTENT, NEXT SLOT: " + this.nextSlot);
+
+          return handlerInput.responseBuilder
+          .speak(this.slotDict[this.currentSlot])       
+          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot])
+          .addElicitSlotDirective(this.currentSlot,
+              this.attributes["temp_" + this.surveyName])
+          .getResponse();
+        }
+        else{
+          return handlerInput.responseBuilder
+          .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
+          .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+          .getResponse();
+        }
+      }
+      else if(lowercaseValue == "previous"){
+        //reserved.previous(this, handlerInput);
+        if(this.previousSlotExists()){
+          this.retractSlots();
+          this.saveSurveyStateFromAttributes(handlerInput);
+          console.log("PREV INTENT, PREVIOUS SLOT: " + this.previousSlot);
+          console.log("PREV INTENT, CURRENT SLOT: " + this.currentSlot);
+          console.log("PREV INTENT, NEXT SLOT: " + this.nextSlot);
+      
+          return handlerInput.responseBuilder
+          .speak(this.slotDict[this.currentSlot])
+          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot])
+          .addElicitSlotDirective(this.currentSlot,
+                  this.attributes["temp_" + this.surveyName])
+          .getResponse();
+      }
+        else{
+            return handlerInput.responseBuilder
+            .speak("There are no previous questions. Do you want to continue?")
+            .reprompt("Hi user. There are no previous questions. Do you want to continue?")
+            .getResponse();
+        }
+      }
+    }
+}
+
+//Date
+function validateDate(input, storedValue)
+{
+  console.log("VALIDATE DATE: " + input);
+  console.log("STORED VALUE: " + storedValue);
+	if (!input || input == storedValue) return false;
+	var date_re = /^\d{3}[\d,X](-((WI|SP|SU|FA)|(\d{2})(-(\d{2}))?|W(\d{2})(-WE)?))?$/;
+	var match = input.match(date_re);
+	if (!match) return false;
+
+	var month = match[4];
+	var day = match[6];
+	var week = match[7];
+
+	if (month)
+	{
+		month = parseInt(month);
+		if (month < 1) return false;
+		if (month > 12) return false;
+	}
+	if (day)
+	{
+		day = parseInt(day);
+		if (day < 1) return false;
+		if (day > 31) return false;
+	}
+	console.log(week);
+	if (week)
+	{
+		week = parseInt(week);
+		if (week < 1) return false;
+		if (week > 52) return false;
+	}
+	return true;
+}
+
+//Phone
+function validatePhone(input)
+{
+	console.log("VALIDATE PHONE: " + input);
+	if (!input) return false;
+	var phone_re = /^(\+?\d{11}|\d{10}|\d{7})$/;
+	var match = input.match(phone_re);
+	if (match)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+//Number
+function validateNumber(input)
+{
+	console.log("VALIDATE NUMBER: " + input);
+	if (!input) return false;
+	var num_re = /^\d+$/;
+	var match = input.match(num_re);
+	if (match)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+
+// YesNo
+function validateYesNo(input)
+{
+  console.log("VALIDATE YESNO: " + input);
+  if (!input) return false;
+  var synonyms = ["YES", "NO", "YEAH", "NAH"];
+  for (var i = 0; i < synonyms.length; i++){
+    if (input.toUpperCase() == synonyms[i]){
+      return true;
+    }
+  }
+  return false;
+
 }

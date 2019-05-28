@@ -123,6 +123,7 @@ const BeginFormHandler = {
     if(handlerInput.requestEnvelope.request.dialogState == "STARTED"){
       survey = new Survey(handlerInput.requestEnvelope.request.intent.name);
       survey.saveSurveyState(handlerInput);
+      survey.saveAttributes(handlerInput);
       console.log("STARTED DIALOG, CURRENT SLOT: " + survey.currentSlot);
       console.log("STARTED DIALOG, NEXT SLOT: " + survey.nextSlot);
       return handlerInput.responseBuilder
@@ -135,8 +136,22 @@ const BeginFormHandler = {
         if(survey.attributes["temp_" + handlerInput.requestEnvelope.request.intent.name]){
           survey.findPreviouslyElicitedSlot(handlerInput);
         }
-        survey.saveSurveyState(handlerInput);
-        survey.saveAttributes(handlerInput);
+        //Validating SearchQuery type, just to make sure we handle intent sample utterancs appropriately
+        if(survey.slotTypes[survey.currentSlot] == "AMAZON.SearchQuery" && survey.intentDetected(handlerInput)){
+          return survey.checkSearchQuery(handlerInput);
+        }
+        //Error handling and validations go here for types other than SearchQuery
+        if(survey.validate(handlerInput)){
+          survey.saveSurveyState(handlerInput);
+          survey.saveAttributes(handlerInput);
+        }
+        else{
+          return handlerInput.responseBuilder
+          //.speak(survey.validationMessages[survey.previouslyElicitedSlot])
+          .speak("Reprompting: " + survey.slotDict[survey.currentSlot])
+          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
+          .getResponse();
+        }
     }
 
     //Update the slot variables
@@ -144,7 +159,7 @@ const BeginFormHandler = {
       if(survey.nextSlotExists()){
         survey.advanceSlots();
       }
-      else if(!survey.nextSlotExists() && survey.flowChanged){
+      else if(!survey.nextSlotExists() && survey.flowChanged && !survey.isComplete(handlerInput)){
         return handlerInput.responseBuilder
         .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
         .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
@@ -161,6 +176,16 @@ const BeginFormHandler = {
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
     }*/
+
+    if(handlerInput.requestEnvelope.request.dialogState === "COMPLETED" || survey.isComplete(handlerInput)){
+      survey.reviewSurvey = handlerInput.requestEnvelope.request.intent.name;
+      survey.attributes["temp_" + survey.reviewSurvey] = handlerInput.requestEnvelope.request.intent;
+      survey.saveSurveyState(handlerInput);
+      return handlerInput.responseBuilder
+     .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
+     .getResponse()
+  }
+
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && survey.flowChanged){
         return handlerInput.responseBuilder
         .speak(survey.slotDict[survey.currentSlot])       
@@ -172,14 +197,6 @@ const BeginFormHandler = {
       return handlerInput.responseBuilder
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
-    }
-    else {
-        survey.reviewSurvey = handlerInput.requestEnvelope.request.intent.name;
-        survey.attributes["temp_" + survey.reviewSurvey] = handlerInput.requestEnvelope.request.intent;
-        survey.saveSurveyState(handlerInput);
-        return handlerInput.responseBuilder
-       .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
-       .getResponse()
     }
   }
 };
@@ -277,19 +294,19 @@ const IDKHandler = {
           .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
-        // Elaborate
-        if (handlerInput.requestEnvelope.request.intent.slots.option.value === "elaborate"){
-          return handlerInput.responseBuilder
-          .speak(survey.elaborations[survey.currentSlot])
-          .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
-          .getResponse();
-        }
-        //  * 1st phase design:  store locally with new objects
-        //  * 2nd phase design:  grab from database eventually
+      }
+      // Elaborate
+      if (handlerInput.requestEnvelope.request.intent.slots.option.value === "elaborate"){
+        return handlerInput.responseBuilder
+        .speak(survey.elaborations[survey.currentSlot])
+        .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
+        .getResponse();
+      }
+      //  * 1st phase design:  store locally with new objects
+      //  * 2nd phase design:  grab from database eventually
       return handlerInput.responseBuilder
       .addDelegateDirective(handlerInput.requestEnvelope.request.intent)
       .getResponse();
-      }
     }
   };
 
