@@ -274,7 +274,7 @@ module.exports = class Survey {
         });
         data.interactionModel.prompts.forEach((item) => {
           if(Object.keys(prompts).includes(item.id)){
-            slotDict[prompts[item.id]] = item.variations[0].value;
+            slotDict[prompts[item.id]] = item.variations;
           }
         });
         return slotDict;
@@ -292,7 +292,6 @@ module.exports = class Survey {
         data.interactionModel.languageModel.intents.forEach((intent) => {
           if(intent.name == this.surveyName){
             intent.slots.forEach((slot) => {
-              console.log(slot);
               types[slot.name] = slot.type;
             })
           }
@@ -386,8 +385,8 @@ module.exports = class Survey {
           console.log("NEXT INTENT, NEXT SLOT: " + this.nextSlot);
 
           return handlerInput.responseBuilder
-          .speak(this.slotDict[this.currentSlot])       
-          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot])
+          .speak(this.slotDict[this.currentSlot][Math.floor(Math.random() * this.slotDict[this.currentSlot].length)].value)       
+          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot][Math.floor(Math.random() * this.slotDict[this.currentSlot].length)].value)
           .addElicitSlotDirective(this.currentSlot,
               this.attributes["temp_" + this.surveyName])
           .getResponse();
@@ -409,8 +408,8 @@ module.exports = class Survey {
           console.log("PREV INTENT, NEXT SLOT: " + this.nextSlot);
       
           return handlerInput.responseBuilder
-          .speak(this.slotDict[this.currentSlot])
-          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot])
+          .speak(this.slotDict[this.currentSlot][Math.floor(Math.random() * this.slotDict[this.currentSlot].length)].value)       
+          .reprompt("Sorry I didn't get that, " + this.slotDict[this.currentSlot][Math.floor(Math.random() * this.slotDict[this.currentSlot].length)].value)
           .addElicitSlotDirective(this.currentSlot,
                   this.attributes["temp_" + this.surveyName])
           .getResponse();

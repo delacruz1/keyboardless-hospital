@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "keyboardless hospital",
+            "invocationName": "thanos",
             "intents": [
                 {
                     "name": "AMAZON.FallbackIntent",
@@ -102,6 +102,9 @@
                         }
                     ],
                     "samples": [
+                        "I don't remember",
+                        "I'm really not sure",
+                        "I'm really not too sure",
                         "I'm not sure",
                         "I don't know"
                     ]
@@ -193,6 +196,8 @@
                         }
                     ],
                     "samples": [
+                        "can i continue a survey",
+                        "Can i continue",
                         "Continue"
                     ]
                 },
@@ -262,6 +267,7 @@
                             "name": "otherDemographic",
                             "type": "AMAZON.SearchQuery",
                             "samples": [
+                                "The patient is {otherDemographic}",
                                 "I am {otherDemographic}",
                                 "{otherDemographic}"
                             ]
@@ -1009,6 +1015,10 @@
                 "variations": [
                     {
                         "type": "PlainText",
+                        "value": "Okay, User. What is the patient's name?"
+                    },
+                    {
+                        "type": "PlainText",
                         "value": "What is the patient's name?"
                     }
                 ]
@@ -1027,6 +1037,10 @@
                 "variations": [
                     {
                         "type": "PlainText",
+                        "value": "What phone number is best to reach the patient?"
+                    },
+                    {
+                        "type": "PlainText",
                         "value": "What is the patient's phone number?"
                     }
                 ]
@@ -1034,6 +1048,10 @@
             {
                 "id": "Elicit.Slot.164917503015.335802176979",
                 "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Who provided the referral to Dr. Navarro?"
+                    },
                     {
                         "type": "PlainText",
                         "value": "Who referred the patient to Dr. Navarro?"
@@ -1045,6 +1063,18 @@
                 "variations": [
                     {
                         "type": "PlainText",
+                        "value": "Okay, you said none of the above. Can you specify the patient's ethnicity?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Okay, User. What ethnicity does the patient fall under?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "What is the patient's ethnicity?"
+                    },
+                    {
+                        "type": "PlainText",
                         "value": "What ethnicity does the patient fall under?"
                     }
                 ]
@@ -1052,6 +1082,14 @@
             {
                 "id": "Elicit.Slot.164917503015.1171417528036",
                 "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Okay, User. Can you list all the prescriptions the patient is taking?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "What medications or prescriptions have been written for the patient?"
+                    },
                     {
                         "type": "PlainText",
                         "value": "What medications or prescriptions is the patient taking?"
@@ -1072,6 +1110,10 @@
                 "variations": [
                     {
                         "type": "PlainText",
+                        "value": "What is the highest eye pressure the patient has experienced?"
+                    },
+                    {
+                        "type": "PlainText",
                         "value": "What was the patient's highest eye pressure?"
                     }
                 ]
@@ -1090,6 +1132,18 @@
                 "variations": [
                     {
                         "type": "PlainText",
+                        "value": "Has the patient been prescribed any medication or prescriptions?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Is the patient on any medication?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Does the patient take any medication?"
+                    },
+                    {
+                        "type": "PlainText",
                         "value": "Is the patient taking any medication?"
                     }
                 ]
@@ -1099,7 +1153,11 @@
                 "variations": [
                     {
                         "type": "PlainText",
-                        "value": "Is the patient Native American, Latino, Asian, Black or African American, Native Hawaiian, White, or none of the above?"
+                        "value": "What ethnicity do you fall under, Native American, Latino, Asian, Black or African American, White, or none of the above?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Is the patient Native American, Latino, Asian, Black or African American,  White, or none of the above?"
                     }
                 ]
             },
@@ -1117,6 +1175,10 @@
                 "variations": [
                     {
                         "type": "PlainText",
+                        "value": "Does the patient's family have any history of glaucoma?"
+                    },
+                    {
+                        "type": "PlainText",
                         "value": "Does the patient have any family history of glaucoma?"
                     }
                 ]
@@ -1124,6 +1186,14 @@
             {
                 "id": "Elicit.Slot.1125215778101.1543653981877",
                 "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the patient's date of birth?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "What is the patient's date of birth. This is an optional question, so you can say next if you don't want to answer it. "
+                    },
                     {
                         "type": "PlainText",
                         "value": "This question is optional, so you can skip it if you want. What is the patient's date of birth?"
