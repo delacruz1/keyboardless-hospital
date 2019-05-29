@@ -188,8 +188,8 @@ const BeginFormHandler = {
 
     if(handlerInput.requestEnvelope.request.dialogState !== "COMPLETED" && survey.flowChanged){
         return handlerInput.responseBuilder
-        .speak(survey.slotDict[survey.currentSlot])       
-       .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot])
+        .speak(survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)       
+       .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)
        .addElicitSlotDirective(survey.currentSlot, handlerInput.requestEnvelope.request.intent)
        .getResponse()
     }
@@ -223,8 +223,8 @@ const PreviousHandler = {
       console.log("PREV INTENT, NEXT SLOT: " + survey.nextSlot);
 
       return handlerInput.responseBuilder
-      .speak(survey.slotDict[survey.currentSlot])
-      .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot])
+      .speak(survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)       
+      .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)
       .addElicitSlotDirective(survey.currentSlot,
             survey.attributes["temp_" + survey.surveyName])
       .getResponse();
@@ -262,8 +262,8 @@ const NextHandler = {
       console.log("NEXT INTENT, NEXT SLOT: " + survey.nextSlot);
 
       return handlerInput.responseBuilder
-      .speak(survey.slotDict[survey.currentSlot])       
-      .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot])
+      .speak(survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)       
+      .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)
       .addElicitSlotDirective(survey.currentSlot,
           survey.attributes["temp_" + survey.surveyName])
       .getResponse();
@@ -345,8 +345,8 @@ const ContinueHandler = {
       survey.loadSurveyState(saveState, synonym);
       if(survey.flowChanged){
         return handlerInput.responseBuilder
-        .speak(survey.slotDict[survey.currentSlot])
-        .reprompt("Sorry, " + survey.slotDict[survey.currentSlot])
+        .speak(survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)       
+      .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)
         .addElicitSlotDirective(survey.currentSlot, saveState[synonym])
         .getResponse();
       }

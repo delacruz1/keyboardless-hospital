@@ -42,10 +42,6 @@
                 <button class="menuOptions text-white" style="">My Surveys</button>
               </a>
               <br>
-              <a href="./receivedSurveys.html">
-                <button class="menuOptions text-white" style="">Received Surveys</button>
-              </a>
-              <br>
               <button class="menuOptions text-white" style="">Settings</button>
             </div>
           </div>
@@ -54,6 +50,7 @@
 		{% for my_survey in mySurveys %}
 		<div class="card text-center" style="width: 18rem;">
 		  <div class="card-body" style="float:none;margin:0 auto;">
+			  <p class="card-text">{{ids[my_survey[0][0]] if my_survey[0][0] in ids else "Unknown (" + my_survey[0][0][18:18+6] +")"}}</p>
 			  <h5 class="card-title">{{ my_survey[1]["name"] }}</h5>
 			  <p class="card-text">{{my_survey[1]["surveyIntroduction"] if my_survey[1]["surveyIntroduction"] else "No Description"}}</p>
 			  <a href="view_survey.html?survey={{my_survey[0]}}" class="btn btn-primary">View Results</a>

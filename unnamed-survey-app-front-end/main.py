@@ -20,6 +20,10 @@ from dynamodbOps import *
 
 app = Flask(__name__)
 
+AMAZON_ID_DICT = {"amzn1.ask.skill.18b02511-5201-494d-b655-fc3dace638cd":"Tim KH",   "amzn1.ask.account.AG2O6VNOKW2WUQMBE53CJ7VMXQVNMTI27X3N6SYK4MWTIRYFHEPFMRB52JUSTBZ6ETV6CZA5QJXJU6GZM3336J4L7LJUFLRPSKDGV4VKDYDIN6TG5UEY2YN54RFFWV7NJS7SHAQPKMZHFGOKAQKWDJXGW2LJTSQMVEZ42DKO7EGP3YUFBY7EYFP66AV33NWRU4SRG6SDUKDHQFY":"Armando KH",
+                 "amzn1.ask.skill.86b80a1d-dc91-4984-ac5b-5c2761e8d894":"Jun KH",   "amzn1.ask.account.AGVPOHB6F3TJ2BCP3C3YDP2U6XJMZNRCJW6BMO4OCGPS4YXMENQTBE5AU5C7CYNY6SZBUACGQP3BYRM4BLYEUPPY354LYSO4F4UYMAHGXGV4DLYPYI6NLM6DI23FFIBEC2F2WPI6JF2JGBLINZXRHP33UZ6BKE7ILOND356KUFLXS75EDKZ5AEP4G3K2W72JCHEMB5VTT2GFMUI":"Micah KH",
+                 "amzn1.ask.account.AG77H4GWXBQLGKIXFR7SVOOMPLRN3EOZDXXSPAFGKF67MID47ZEVBTDBZXDPG4AFQ6RBFU4JAARFKXMOOW5YY6F6MA6JLZNUTVDXYZUPIMIRKPLS6HEF2PEVWUROUCGQW36YQCNGXJIYPODKQK3QB3E2V3MFBEQBEUZIHDJDWCBCBMW3RZVVXSK6RSFA4W7PUBM4QZAIG5J3VPI":"Carlos KH","amzn1.ask.skill.138110ff-8dfb-44cb-a1fc-b7c092621a0d":"Josh KH"}
+
 @app.route('/')
 def root():
     dummy_time = ["hater oclock"]
@@ -47,7 +51,7 @@ def mySurveysPage():
     print(survey_objs)
         #url = s["SurveyName"].replace(" ", "%20")
         #survey_objs.append((s,url))
-    return render_template('my_surveys.html', mySurveys=survey_objs)
+    return render_template('my_surveys.html', mySurveys=survey_objs, ids=AMAZON_ID_DICT)
 
 @app.route('/view_survey.html')
 def viewSurveyPage():
@@ -61,7 +65,6 @@ def viewSurveyPage():
         if k == survey_key:
             my_survey = v
             break
-    print(my_survey)
     return render_template('view_survey.html', my_survey=my_survey)
 
 if __name__ == '__main__':
