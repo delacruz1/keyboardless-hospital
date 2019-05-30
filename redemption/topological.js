@@ -94,7 +94,7 @@ module.exports = class Survey {
                   console.log("SURVEY NAME SAVED: " + this.surveyName);
                     saveState[this.surveyName] = handlerInput.requestEnvelope.request.intent;
                     Object.keys(saveState[this.surveyName].slots).forEach((slot) => {
-                      saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot];
+                      saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot][this.slotDict[slot].length - 1].value;
                     });
                 }
                 saveState[this.surveyName]["surveyIntroduction"] = this.introductions[this.surveyName];
@@ -121,7 +121,7 @@ module.exports = class Survey {
               saveState[this.surveyName]["currentSlot"] = this.currentSlot;
               saveState[this.surveyName]["flow"] = this.flowChanged;
               Object.keys(saveState[this.surveyName].slots).forEach((slot) => {
-                saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot];
+                saveState[this.surveyName].slots[slot]["questionText"] = this.slotDict[slot][this.slotDict[slot].length - 1].value;
               });
               handlerInput.attributesManager.setPersistentAttributes(saveState);
               handlerInput.attributesManager.savePersistentAttributes();

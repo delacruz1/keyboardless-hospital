@@ -148,7 +148,8 @@ const BeginFormHandler = {
         else{
           return handlerInput.responseBuilder
           //.speak(survey.validationMessages[survey.previouslyElicitedSlot])
-          .speak("Reprompting: " + survey.slotDict[survey.currentSlot])
+          .speak("Sorry, I'm not too sure about your answer," + survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)       
+       .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)
           .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }
@@ -290,7 +291,8 @@ const IDKHandler = {
         if(survey.nextSlotExists()){
           survey.advanceSlots();
           return handlerInput.responseBuilder
-          .speak("Okay, I'll take you to the next question. " + survey.slotDict[survey.currentSlot])
+          .speak(survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)       
+          .reprompt("Sorry I didn't get that, " + survey.slotDict[survey.currentSlot][Math.floor(Math.random() * survey.slotDict[survey.currentSlot].length)].value)
           .addElicitSlotDirective(survey.currentSlot, survey.attributes["temp_" + survey.surveyName])
           .getResponse();
         }

@@ -3,5 +3,5 @@ survey = new Survey("DemoSurvey");
 
 Object.keys(survey.slotDict).forEach((item) => {
     console.log("SLOT: " + item)
-    console.log(survey.slotDict[item][Math.floor(Math.random() * survey.slotDict[item].length)].value);
+    console.log(survey.slotDict[item][survey.slotDict[item].length - 1].value);
 });
