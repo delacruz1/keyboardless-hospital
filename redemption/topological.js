@@ -393,8 +393,8 @@ module.exports = class Survey {
         }
         else{
           return handlerInput.responseBuilder
-          .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-          .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+          .speak("There are no more questions. You did not finish the survey yet, I'll let you come back to it later, thank you for trying our skill!")
+          .reprompt("Hi user. You've reached the end of the survey, but did not finish yet, I'll let you come back to it later, thank you for trying our skill!")
           .getResponse();
         }
       }
@@ -416,8 +416,8 @@ module.exports = class Survey {
       }
         else{
             return handlerInput.responseBuilder
-            .speak("There are no previous questions. Do you want to continue?")
-            .reprompt("Hi user. There are no previous questions. Do you want to continue?")
+            .speak("There are no previous questions, I'll let you come back to this later, thank you for trying our skill!")
+            .reprompt("Hi user. There are no previous questions, I'll let you come back to this later, thank you for trying our skill!")
             .getResponse();
         }
       }
