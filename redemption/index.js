@@ -162,8 +162,8 @@ const BeginFormHandler = {
       }
       else if(!survey.nextSlotExists() && survey.flowChanged && !survey.isComplete(handlerInput)){
         return handlerInput.responseBuilder
-        .speak("You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
-        .reprompt("Hi User. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+        .speak("You've reached the end of the survey, but did not finish yet, I'll let you come back to it later, thank you for trying our skill!")
+        .reprompt("Hi User. You've reached the end of the survey, but did not finish yet, I'll let you come back to it later, thank you for trying our skill!")
         .getResponse();
       }
       console.log("IN_PROGRESS DIALOG, PREVIOUS SLOT: " + survey.previousSlot);
@@ -183,7 +183,7 @@ const BeginFormHandler = {
       survey.attributes["temp_" + survey.reviewSurvey] = handlerInput.requestEnvelope.request.intent;
       survey.saveSurveyState(handlerInput);
       return handlerInput.responseBuilder
-     .speak("Thank you for submitting your responses, User! Do you want to review your responses, submit, or come back later?")
+     .speak("Thank you for trying our skill, User! You can see your responses in the website sent to you.")
      .getResponse()
   }
 
@@ -232,8 +232,8 @@ const PreviousHandler = {
     }
     else{
       return handlerInput.responseBuilder
-      .speak("There are no previous questions. Do you want to continue?")
-      .reprompt("Hi user. There are no previous questions. Do you want to continue?")
+      .speak("There are no previous questions, I'll let you come back to this later, thank you for trying our skill!")
+      .reprompt("Hi user. There are no previous questions, I'll let you come back to this later, thank you for trying our skill!")
       .getResponse();
     }
   }
@@ -271,8 +271,8 @@ const NextHandler = {
     }
     else{
       return handlerInput.responseBuilder
-      .speak("There are no more questions. You did not finish the survey yet. Do you want to review it or come back to it later?")
-      .reprompt("Hi user. You've reached the end of the survey, but did not finish yet. Do you want to review it or come back to it later?")
+      .speak("There are no more questions. You did not finish the survey yet, I'll let you come back to it later, thank you for trying our skill!")
+      .reprompt("Hi user. You've reached the end of the survey, but did not finish yet, I'll let you come back to it later, thank you for trying our skill!")
       .getResponse();
     }
 }
@@ -358,43 +358,6 @@ const ContinueHandler = {
     }
   }
 }
-
-const NewSurveyHandler = { 
-  canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'NewSurveyIntent';
-
-    },
-
-  handle(handlerInput){
-    const speakOutput = "What survey would you like to begin?";
-
-  }
-
-
-}
-
-  // const ReviewHandler = {
-  //   canHandle(handlerInput) {
-  //     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-  //       && handlerInput.requestEnvelope.request.intent.name === 'ReviewIntent';
-  //   },
-  //   handle(handlerInput) {
-  //     if(survey.reviewSurvey || handlerInput.requestEnvelope.request.intent.slots.survey.value){
-  //       return handlerInput.responseBuilder
-  //       .speak("Okay, you can review your survey results if you have the Alexa app or Alexa smart device.")
-  //       .withStandardCard(cardTitle, content)
-  //       .getResponse();
-  //     }
-  //     else{
-  //       return handlerInput.responseBuilder
-  //       .speak("Which survey do you want to review?")
-  //       .addElicitSlotDirective("survey")
-  //       .getResponse();
-  //     }
-  //   }
-  // };
-
 
 //Default Handlers, need to explore and utilize more!
 const HelpHandler = {
@@ -487,8 +450,7 @@ exports.handler = skillBuilder
     RepeatHandler,
     ExitHandler,
     SessionEndedRequestHandler,
-    ContinueHandler,
-    NewSurveyHandler 
+    ContinueHandler
   )
   //.addRequestInterceptors(LocalizationInterceptor)
   .withPersistenceAdapter(persistenceAdapter) // tells Skill Builder to use persistence adapter
